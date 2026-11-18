@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F766E">
+<title>تصوير تلقائي</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
+<style>
+:root{--bg:#F6F4EF;--ink:#1B1B1B;--mute:#55524D;--teal:#0F766E;--red:#D32F2F}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Cairo,sans-serif}
+section{min-height:100%;display:flex;flex-direction:column;gap:18px;padding:max(28px,env(safe-area-inset-top)) 22px max(24px,env(safe-area-inset-bottom))}
+section[hidden]{display:none}
+h1{margin:0;font-size:28px}
+p{margin:0;font-size:16px;line-height:1.7;color:var(--mute)}
+button,label.btn{height:56px;border-radius:14px;border:2px solid var(--teal);background:transparent;color:var(--teal);font:700 18px Cairo,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;width:100%}
+button.main{background:var(--teal);color:#fff}
+button.stop{background:var(--red);border-color:var(--red);color:#fff}
+button:disabled{opacity:.5}
+.grow{flex:1}.col{display:flex;flex-direction:column;gap:12px}
+.center{justify-content:center}
+#msg{min-height:24px;color:var(--red);font-size:15px}
+#faces{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
+#faces img,.ph{width:96px;height:96px;border-radius:48px;object-fit:cover;border:3px solid var(--teal)}
+.ph{display:flex;align-items:center;justify-content:center;border-style:dashed;color:var(--mute);font-size:14px;text-align:center}
+#cam{background:#111;color:#fff}
+#stage{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:#2A2A2A}
+video#v{width:100%;height:100%;object-fit:cover}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{display:flex;align-items:center;gap:8px;background:#2A2A2A;border-radius:20px;padding:8px 14px;font-size:15px}
+.dot{width:12px;height:12px;border-radius:6px;background:#888}
+.on .dot{background:#FF5252}
+#cam p{color:#D6D3CE;text-align:center;font-size:15px}
+.vid{background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.vid video{width:100%;border-radius:10px;background:#000}
+.vid b{font-size:17px}
+.small{height:44px;font-size:16px}
+</style>
+</head>
+<body>
+
+<section id="home" class="center">
+<div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
+<div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goVids">فيديوهاتي</button></div>
+</section>
+
+<section id="person" hidden>
+<h1>اختر الشخص</h1>
+<p>اختر صورة واضحة لوجه واحد. يمكنك اختيار عدة صور لنفس الشخص لتحسين الدقة.</p>
+<div class="grow col center"><div id="faces"></div></div>
+<div id="msg"></div>
+<div class="col">
+<label class="btn" for="file">اختيار صور من المعرض</label>
+<input id="file" type="file" accept="image/*" multiple hidden>
+<button class="main" id="next" disabled>حفظ والمتابعة</button>
+<button id="back1">رجوع</button>
+</div>
+</section>
+
+<section id="cam" hidden>
+<div class="bar"><div class="pill" id="st"><span class="dot"></span><span id="stt">بانتظار ظهور الشخص</span></div><b id="tm">00:00</b></div>
+<div id="stage"><video id="v" playsinline muted></video></div>
+<p>إذا اختفى الشخص يتوقف التسجيل تلقائياً ويكمل حين يظهر.</p>
+<div class="bar"><button id="flip" style="width:35%;border-color:#fff;color:#fff">قلب الكاميرا</button><button class="stop" id="end" style="width:62%">إنهاء التصوير</button></div>
+</section>
+
+<section id="vids" hidden>
+<h1>فيديوهاتي</h1>
+<div id="list" class="col"></div>
+<p id="empty">لا توجد فيديوهات بعد. ابدأ تصويراً جديداً.</p>
+<div class="grow"></div>
+<button id="back2">رجوع</button>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const MP='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+const TH=0.5, GRACE=1200; // TH: أقل = أدقّ وأكثر تشدداً | GRACE: مهلة قبل الإيقاف (مللي ثانية)
+let refs=[],thumbs=[],ready=false,stream,rec,chunks=[],running=false,lastSeen=0,facing='user',recMs=0,timer,vids=[],wake,mime='';
+try{const s=JSON.parse(localStorage.getItem('person')||'null');if(s){refs=s.d.map(a=>new Float32Array(a));thumbs=s.t}}catch(e){}
+
+function show(id){document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id)}
+function msg(t){$('#msg').textContent=t||''}
+function drawFaces(){const f=$('#faces');f.innerHTML='';if(!thumbs.length){f.innerHTML='<div class="ph">لا توجد صورة</div>'}thumbs.forEach(t=>{const i=new Image();i.src=t;f.appendChild(i)});$('#next').disabled=!refs.length}
+async function loadModels(){if(ready)return;if(!window.faceapi)throw new Error('لم يتم تحميل مكتبة الوجوه. تأكد من الإنترنت.');
+ await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MP),faceapi.nets.faceLandmark68TinyNet.loadFromUri(MP),faceapi.nets.faceRecognitionNet.loadFromUri(MP)]);ready=true}
+const opts=(n)=>new faceapi.TinyFaceDetectorOptions({inputSize:n,scoreThreshold:0.5});
+
+$('#goStart').onclick=()=>{show('person');drawFaces()};
+$('#goVids').onclick=()=>{drawVids();show('vids')};
+$('#back1').onclick=()=>show('home');
+$('#back2').onclick=()=>show('home');
+
+$('#file').onchange=async e=>{
+ const files=[...e.target.files];if(!files.length)return;
+ msg('جاري تحليل الصور...');$('#next').disabled=true;
+ try{await loadModels()}catch(er){msg(er.message);return}
+ let bad=0;
+ for(const f of files){
+  const img=await faceapi.bufferToImage(f);
+  const d=await faceapi.detectSingleFace(img,opts(512)).withFaceLandmarks(true).withFaceDescriptor();
+  if(!d){bad++;continue}
+  refs.push(d.descriptor);
+  const b=d.detection.box,c=document.createElement('canvas');c.width=c.height=96;
+  const sz=Math.max(b.width,b.height)*1.2;
+  c.getContext('2d').drawImage(img,b.x+b.width/2-sz/2,b.y+b.height/2-sz/2,sz,sz,0,0,96,96);
+  thumbs.push(c.toDataURL('image/jpeg',.8));
+ }
+ e.target.value='';
+ try{localStorage.setItem('person',JSON.stringify({d:refs.map(a=>Array.from(a)),t:thumbs}))}catch(er){}
+ drawFaces();
+ msg(bad?`لم أجد وجهاً واضحاً في ${bad} صورة. جرّب صورة أوضح.`:'');
+};
+
+$('#next').onclick=async()=>{
+ msg('جاري تجهيز الكاميرا...');
+ try{await loadModels();await startCam();show('cam');beginRec()}catch(er){msg('تعذّر التشغيل: '+(er.message||er)+' (اسمح للتطبيق باستخدام الكاميرا والمايك)')}
+};
+
+async function startCam(){
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:true});
+ const v=$('#v');v.srcObject=stream;v.style.transform=facing==='user'?'scaleX(-1)':'none';await v.play();
+}
+$('#flip').onclick=async()=>{ // قلب الكاميرا يوقف المقطع الحالي ويبدأ مقطعاً جديداً
+ if(!running)return;await finish(true);facing=facing==='user'?'environment':'user';await startCam();beginRec();
+};
+
+function beginRec(){
+ mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+ chunks=[];recMs=0;lastSeen=0;running=true;
+ rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+ rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+ rec.start(1000);rec.pause();setStatus(false);
+ clearInterval(timer);timer=setInterval(()=>{if(rec&&rec.state==='recording')recMs+=500;const s=Math.floor(recMs/1000);$('#tm').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+ if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{});
+ look();
+}
+function setStatus(on){$('#st').className='pill'+(on?' on':'');$('#stt').textContent=on?'التسجيل شغال':'متوقف: بانتظار ظهور الشخص'}
+
+async function look(){
+ if(!running)return;
+ try{
+  const ds=await faceapi.detectAllFaces($('#v'),opts(320)).withFaceLandmarks(true).withFaceDescriptors();
+  const ok=ds.some(d=>refs.some(r=>faceapi.euclideanDistance(d.descriptor,r)<TH));
+  const now=Date.now();
+  if(ok){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
+  else if(rec.state==='recording'&&now-lastSeen>GRACE){rec.pause();setStatus(false)}
+ }catch(e){}
+ setTimeout(look,120);
+}
+
+function finish(keepCam){
+ return new Promise(res=>{
+  running=false;clearInterval(timer);if(wake)wake.release().catch(()=>{});
+  const done=()=>{
+   if(!keepCam&&stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+   if(chunks.length&&recMs>0){
+    const type=(rec.mimeType||mime||'video/webm').split(';')[0];
+    const blob=new Blob(chunks,{type});
+    vids.unshift({url:URL.createObjectURL(blob),ext:type.includes('mp4')?'mp4':'webm',ms:recMs,at:new Date()});
+   }
+   res();
+  };
+  if(rec&&rec.state!=='inactive'){rec.onstop=done;rec.stop()}else done();
+ });
+}
+$('#end').onclick=async()=>{const n=vids.length;await finish(false);drawVids();show('vids');if(vids.length===n)$('#empty').textContent='لم يظهر الشخص أثناء التصوير، لذلك لم يُحفظ فيديو.'};
+
+function fmt(ms){const s=Math.round(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function drawVids(){
+ const l=$('#list');l.innerHTML='';$('#empty').hidden=!!vids.length;if(vids.length)$('#empty').textContent='';
+ if(!vids.length)$('#empty').textContent='لا توجد فيديوهات بعد. ابدأ تصويراً جديداً.';
+ vids.forEach((v,i)=>{
+  const d=document.createElement('div');d.className='vid';
+  d.innerHTML=`<b>فيديو ${vids.length-i} — ${fmt(v.ms)}</b><video controls playsinline src="${v.url}"></video><a><button class="small main">حفظ في الجوال</button></a>`;
+  const a=d.querySelector('a');a.href=v.url;a.download=`video-${v.at.toISOString().slice(0,19).replace(/[:T]/g,'-')}.${v.ext}`;
+  l.appendChild(d);
+ });
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
