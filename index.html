@@ -29,6 +29,9 @@ button:disabled{opacity:.5}
 #cam{background:#111;color:#fff}
 #stage{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:#2A2A2A}
 video#v{width:100%;height:100%;object-fit:cover}
+[hidden]{display:none!important}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#bgv{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .pill{display:flex;align-items:center;gap:10px;background:#2A2A2A;border-radius:24px;padding:10px 16px;font-size:20px;font-weight:700}
 .dot{width:16px;height:16px;border-radius:8px;background:#888}
@@ -64,8 +67,10 @@ video#v{width:100%;height:100%;object-fit:cover}
 
 <section id="cam" hidden>
 <div class="bar"><div class="pill" id="st"><span class="dot"></span><span id="stt">بانتظار الشخص</span></div><b id="tm">00:00</b></div>
-<div id="stage"><video id="v" playsinline muted></video></div>
+<div id="stage"><video id="v" playsinline muted></video><canvas id="cv" hidden></canvas></div>
 <div class="bar"><button id="flip">قلب الكاميرا</button><button id="zout" style="width:90px">−</button><button id="zin" style="width:90px">+</button></div>
+<div class="bar"><button id="bg">تغيير الخلفية</button><button id="nobg" style="width:42%" hidden>بدون خلفية</button></div>
+<p id="bgm"></p>
 <button id="lv">الحساسية: متوسطة</button>
 <button class="stop" id="end">إنهاء التصوير</button>
 </section>
@@ -78,7 +83,8 @@ video#v{width:100%;height:100%;object-fit:cover}
 <button id="back2">رجوع</button>
 </section>
 
-<canvas id="cv" hidden></canvas>
+<video id="bgv" loop muted playsinline></video>
+<input id="bgf" type="file" accept="image/*,video/*" hidden>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
 <script>
 const $=s=>document.querySelector(s);
@@ -89,6 +95,7 @@ const GRACE=1500; // مهلة قبل الإيقاف (مللي ثانية)
 let lv=+(localStorage.getItem('lv')||1);
 let refs=[],thumbs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastLearn=0,zoom=1,drawOn=false,cvs=$('#cv'),cx=cvs.getContext('2d');
+let bg=null,bgType='',seg=null,segBusy=false;const bgv=$('#bgv');
 try{const s=JSON.parse(localStorage.getItem('person')||'null');if(s){refs=s.d.map(a=>new Float32Array(a));thumbs=s.t}}catch(e){}
 const base=refs.length;
 
@@ -150,16 +157,48 @@ async function setZoom(d){
 $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
 
 // نرسم الكاميرا على لوحة ونسجّل اللوحة، فيبقى الفيديو واحداً حتى لو بدّلت الكاميرا
+function cover(src,sw,sh){const k=Math.max(cvs.width/sw,cvs.height/sh),w=sw*k,h=sh*k;cx.drawImage(src,(cvs.width-w)/2,(cvs.height-h)/2,w,h)}
 function paint(){
  if(!drawOn)return;
  const v=$('#v');
  if(v.videoWidth){
   if(!cvs.width){const portrait=v.videoHeight<v.videoWidth;cvs.width=portrait?720:1280;cvs.height=portrait?1280:720}
-  const s=Math.max(cvs.width/v.videoWidth,cvs.height/v.videoHeight),w=v.videoWidth*s,h=v.videoHeight*s;
-  cx.drawImage(v,(cvs.width-w)/2,(cvs.height-h)/2,w,h);
+  if(bg&&seg){if(!segBusy){segBusy=true;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
+  else cover(v,v.videoWidth,v.videoHeight);
  }
  requestAnimationFrame(paint);
 }
+// تبديل الخلفية: نفصل الشخص عن خلفيته ثم نضعه فوق الصورة أو الفيديو المختار
+function onSeg(r){
+ if(!drawOn||!bg)return;const v=$('#v'),m=r.segmentationMask;
+ cx.save();cx.clearRect(0,0,cvs.width,cvs.height);
+ cx.filter='blur(3px)';cover(m,m.width,m.height);cx.filter='none';
+ cx.globalCompositeOperation='source-in';cover(v,v.videoWidth,v.videoHeight);
+ cx.globalCompositeOperation='destination-over';
+ if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight);else cover(bg,bg.width,bg.height);
+ cx.restore();
+}
+function loadSeg(){
+ if(seg)return Promise.resolve();
+ const B='https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/';
+ return new Promise((res,rej)=>{const t=document.createElement('script');t.src=B+'selfie_segmentation.js';
+  t.onload=async()=>{try{const g=new SelfieSegmentation({locateFile:f=>B+f});g.setOptions({modelSelection:0});g.onResults(onSeg);await g.initialize();seg=g;res()}catch(e){rej(e)}};
+  t.onerror=rej;document.head.appendChild(t)});
+}
+$('#bg').onclick=()=>$('#bgf').click();
+$('#bgf').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ $('#bgm').textContent='جاري تجهيز الخلفية... (أول مرة تأخذ وقتاً)';
+ try{
+  await loadSeg();const url=URL.createObjectURL(f);
+  if(f.type.startsWith('video')){bgv.src=url;await bgv.play();bg=bgv;bgType='video'}
+  else{const im=new Image();im.src=url;await im.decode();bg=im;bgType='img'}
+  cvs.hidden=false;$('#nobg').hidden=false;$('#bgm').textContent='';
+ }catch(er){$('#bgm').textContent='تعذّر تجهيز الخلفية. تأكد من الإنترنت وجرّب مرة أخرى.'}
+};
+function clearBg(){bg=null;bgv.pause();cvs.hidden=true;$('#nobg').hidden=true;$('#bgm').textContent=''}
+$('#nobg').onclick=clearBg;
+
 function beginRec(){
  mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
  chunks=[];recMs=0;lastSeen=0;running=true;lastBox=null;cvs.width=0;drawOn=true;paint();
@@ -196,7 +235,7 @@ async function look(){
 
 function finish(){
  return new Promise(res=>{
-  running=false;drawOn=false;clearInterval(timer);if(wake)wake.release().catch(()=>{});
+  running=false;drawOn=false;clearBg();clearInterval(timer);if(wake)wake.release().catch(()=>{});
   const done=()=>{
    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
    if(astream){astream.getTracks().forEach(t=>t.stop());astream=null}
