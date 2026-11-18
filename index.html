@@ -140,14 +140,19 @@ $('#next').onclick=async()=>{
  catch(er){msg('تعذّر التشغيل: '+(er.message||er)+' (اسمح للتطبيق باستخدام الكاميرا والمايك)')}
 };
 
+function note(t){$('#bgm').textContent=t||''}
 async function startCam(){
- const old=stream;
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+ const v=$('#v');v.srcObject=null;
  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}},audio:false});
- if(old)old.getTracks().forEach(t=>t.stop());
- const v=$('#v');v.srcObject=stream;v.style.transform=facing==='user'?'scaleX(-1)':'none';await v.play();
+ v.srcObject=stream;v.style.transform=facing==='user'?'scaleX(-1)':'none';await v.play();
  zoom=1;lastBox=null;
 }
-$('#flip').onclick=async()=>{if(!running)return;facing=facing==='user'?'environment':'user';try{await startCam()}catch(e){facing=facing==='user'?'environment':'user'}};
+$('#flip').onclick=async()=>{
+ if(!running)return;const prev=facing;facing=facing==='user'?'environment':'user';note('جاري قلب الكاميرا...');
+ try{await startCam();note(facing==='user'?'الكاميرا الأمامية':'الكاميرا الخلفية');setTimeout(()=>note(''),2500)}
+ catch(e){facing=prev;try{await startCam()}catch(e2){}note('تعذّر فتح الكاميرا الأخرى ('+(e.name||'خطأ')+')')}
+};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0];const c=t&&t.getCapabilities&&t.getCapabilities();
  if(!c||!c.zoom){alert('هذه الكاميرا لا تدعم التقريب. اقترب من الشخص أكثر.');return}
@@ -162,7 +167,7 @@ function paint(){
  if(!drawOn)return;
  const v=$('#v');
  if(v.videoWidth){
-  if(!cvs.width){const portrait=v.videoHeight<v.videoWidth;cvs.width=portrait?720:1280;cvs.height=portrait?1280:720}
+  if(!cvs.width){const k=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight));cvs.width=Math.round(v.videoWidth*k);cvs.height=Math.round(v.videoHeight*k)}
   if(bg&&seg){if(!segBusy){segBusy=true;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
   else cover(v,v.videoWidth,v.videoHeight);
  }
@@ -229,6 +234,7 @@ async function look(){
   }
   if(hit){lastBox=hit.d.detection.box;lastT=now;lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
   else if(rec.state==='recording'&&now-lastSeen>GRACE){rec.pause();setStatus(false)}
+  if(rec.state==='paused')$('#stt').textContent='متوقف: '+(ds.length?'أرى '+ds.length+' وجه وليس الشخص المطلوب':'لا أرى أي وجه');
  }catch(e){}
  setTimeout(look,100);
 }
