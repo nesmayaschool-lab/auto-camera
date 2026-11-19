@@ -48,8 +48,8 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 #side{position:absolute;right:6px;top:50%;transform:translateY(-50%);max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
 #side .g{display:flex;flex-direction:column;align-items:center;gap:6px}
-#side span{font-size:14px;font-weight:700;color:#FDE68A}
-#cam .sb{width:78px;height:44px;min-height:44px;border-radius:12px;padding:0 4px;font-size:16px;background:rgba(0,0,0,.65);border-width:2px}
+#side span{font-size:17px;font-weight:700;color:#FDE68A}
+#cam .sb{width:104px;height:54px;min-height:54px;border-radius:14px;padding:0 4px;font-size:20px;background:rgba(0,0,0,.72);border-width:2px}
 textarea.in{min-height:110px;resize:vertical}
 #toast{position:fixed;left:14px;right:14px;bottom:90px;background:#222;color:#fff;padding:14px;border-radius:14px;font-size:20px;text-align:center;z-index:50}
 #sheet{position:absolute;left:8px;right:8px;bottom:8px;max-height:75%;overflow-y:auto;background:rgba(10,22,48,.96);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
@@ -60,7 +60,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 10</p>
+<p style="text-align:center;font-size:15px">الإصدار 11</p>
 </section>
 
 <section id="person" hidden>
@@ -520,6 +520,15 @@ function openSheet(){
 }
 $('#dat').onclick=()=>{if(ovl){ovl=null;$('#dat').textContent='عرض البيانات';updPrev()}else openSheet()};
 
+/* ---------- تخزين الفيديوهات داخل التطبيق (تبقى بعد إغلاقه) ---------- */
+const DB={
+ open(){return new Promise((res,rej)=>{const r=indexedDB.open('autocam',1);r.onupgradeneeded=()=>r.result.createObjectStore('v',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+ async all(){const d=await this.open();return new Promise(res=>{const q=d.transaction('v').objectStore('v').getAll();q.onsuccess=()=>res(q.result);q.onerror=()=>res([])})},
+ async put(o){const d=await this.open();return new Promise(res=>{const t=d.transaction('v','readwrite');t.objectStore('v').put(o);t.oncomplete=()=>res(true);t.onerror=()=>res(false)})},
+ async del(id){const d=await this.open();return new Promise(res=>{const t=d.transaction('v','readwrite');t.objectStore('v').delete(id);t.oncomplete=()=>res(true);t.onerror=()=>res(false)})}
+};
+DB.all().then(a=>{vids=a.sort((x,y)=>y.at-x.at).map(o=>({id:o.id,url:URL.createObjectURL(o.blob),ext:o.ext,ms:o.ms,at:new Date(o.at)}));if(curS==='vids')drawVids()}).catch(()=>{});
+
 /* ---------- الإنهاء وقائمة الفيديوهات ---------- */
 function finish(){
  return new Promise(res=>{
@@ -530,21 +539,26 @@ function finish(){
    if(astream){astream.getTracks().forEach(t=>t.stop());astream=null}
    if(rec&&chunks.length&&recMs>0){
     const type=(rec.mimeType||mime||'video/webm').split(';')[0];
-    vids.unshift({url:URL.createObjectURL(new Blob(chunks,{type})),ext:type.includes('mp4')?'mp4':'webm',ms:recMs,at:new Date()});
+    const blob=new Blob(chunks,{type}),o={id:String(Date.now()),ext:type.includes('mp4')?'mp4':'webm',ms:recMs,at:Date.now(),blob};
+    DB.put(o).catch(()=>{});vids.unshift({id:o.id,url:URL.createObjectURL(blob),ext:o.ext,ms:o.ms,at:new Date(o.at)});
    }
    res();
   };
   if(rec&&rec.state!=='inactive'){rec.onstop=done;rec.stop()}else done();
  });
 }
-$('#end').onclick=async()=>{const n=vids.length;await finish();show('vids');if(vids.length===n)$('#empty').textContent='لم يظهر الشخص أثناء التصوير، لذلك لم يُحفظ فيديو.'};
+$('#end').onclick=async()=>{const n=vids.length;await finish();show('vids');if(vids.length===n)$('#empty').textContent='لم يظهر الشخص أثناء التصوير، لذلك لم يُحفظ فيديو.';else toast('تم حفظ الفيديو داخل التطبيق. اضغط «حفظ في الجوال» ليظهر في جوالك.')};
 function fmt(ms){const s=Math.round(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function drawVids(){
- const l=$('#list');l.innerHTML='';$('#empty').textContent=vids.length?'':'لا توجد فيديوهات بعد. ابدأ تصويراً جديداً.';
- vids.forEach((v,i)=>{
+ const l=$('#list');l.innerHTML='';
+ $('#empty').textContent=vids.length?'الفيديوهات محفوظة داخل التطبيق. اضغط «حفظ في الجوال» لنسخها إلى مجلد التنزيلات (Download) في جوالك.':'لا توجد فيديوهات بعد. ابدأ تصويراً جديداً.';
+ vids.forEach(v=>{
   const d=document.createElement('div');d.className='vid';
-  d.innerHTML=`<b>فيديو ${vids.length-i} — ${fmt(v.ms)}</b><video controls playsinline src="${v.url}"></video><a><button class="main">حفظ في الجوال</button></a>`;
-  const a=d.querySelector('a');a.href=v.url;a.download=`video-${v.at.toISOString().slice(0,19).replace(/[:T]/g,'-')}.${v.ext}`;
+  d.innerHTML='<b></b><video controls playsinline></video><a><button class="main">حفظ في الجوال</button></a><button class="rm" style="border-color:var(--red);color:var(--red)">حذف الفيديو</button>';
+  d.querySelector('b').textContent='فيديو '+fmt(v.ms)+' — '+v.at.toLocaleString('ar');
+  d.querySelector('video').src=v.url;
+  const a=d.querySelector('a');a.href=v.url;a.download='video-'+v.at.toISOString().slice(0,19).replace(/[:T]/g,'-')+'.'+v.ext;
+  d.querySelector('.rm').onclick=()=>{if(!confirm('حذف هذا الفيديو نهائياً؟'))return;DB.del(v.id);URL.revokeObjectURL(v.url);vids=vids.filter(x=>x!==v);drawVids()};
   l.appendChild(d);
  });
 }
