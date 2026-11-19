@@ -61,7 +61,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 16</p>
+<p style="text-align:center;font-size:15px">الإصدار 18</p>
 </section>
 
 <section id="person" hidden>
@@ -95,9 +95,10 @@ textarea.in{min-height:110px;resize:vertical}
 <div id="sheet" hidden></div>
 </div>
 <p id="bgm"></p>
-<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
+<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="fill" style="flex:1 1 30%">ملء الشاشة: لا</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
 <button id="dat">عرض البيانات</button>
 <button class="stop" id="end">إنهاء التصوير</button>
+<p id="dbg" style="font-size:12px;color:#9ca3af;min-height:14px"></p>
 </section>
 
 <section id="vids" hidden>
@@ -133,6 +134,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• رجوع: يوقف التصوير ويحفظ ما صُوّر.</span>
 <span>• قلب الكاميرا: أمامية أو خلفية بدون قطع الفيديو.</span>
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
+<span>• ملء الشاشة: «نعم» يملأ الفيديو كل الشاشة (قد يقصّ الجوانب)، و«لا» يُظهر المشهد كاملاً بحدوده الأصلية.</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس الصورة.</span>
 <span>• أعلى / أخفض: يرفع أو يخفض صوت المايك. كتم: يوقف الصوت.</span>
 <span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
@@ -161,7 +163,7 @@ let gri=+(localStorage.getItem('gr')||1);if(!(gri>=0&&gri<3))gri=1;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FILL=localStorage.getItem('fill')==='1',people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
@@ -193,6 +195,7 @@ $('#goStart').onclick=()=>show('person');
 $('#goData').onclick=()=>show('data');
 $('#goVids').onclick=()=>show('vids');
 $('#goHelp').onclick=()=>show('help');
+const por=()=>(screen.orientation&&screen.orientation.type)?screen.orientation.type.startsWith('portrait'):innerHeight>=innerWidth;
 function note(t){$('#bgm').textContent=t||''}
 function flash(t){note(t);clearTimeout(zt);zt=setTimeout(()=>note(''),1800)}
 
@@ -273,8 +276,8 @@ $('#next').onclick=async()=>{
 };
 async function startCam(){
  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
- const v=$('#v');v.srcObject=null;const P=innerHeight>innerWidth;
- stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:1280},height:{ideal:P?1280:720},frameRate:{ideal:24,max:30}},audio:false});
+ const v=$('#v');v.srcObject=null;const P=por();
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:960},height:{ideal:P?960:720},frameRate:{ideal:24,max:30}},audio:false});
  v.srcObject=stream;await v.play();autoRot();
  zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
 }
@@ -289,26 +292,24 @@ function updPrev(){cvs.hidden=!running;$('#pg').hidden=!bg}
 let calibrated=false,calN=0;
 function autoRot(){
  const v=$('#v');ROT=0;MIR=false;calN=0;calibrated=false;
- const sv=localStorage.getItem('rot_'+facing); // اتجاه صحّحته أنت سابقاً لهذه الكاميرا
+ const sv=localStorage.getItem('rot2_'+facing); // اتجاه صحّحته أنت سابقاً لهذه الكاميرا
  if(sv!==null){ROT=+sv||0;calibrated=true;return}
- if(v.videoWidth&&innerHeight>=innerWidth&&v.videoWidth>v.videoHeight)ROT=facing==='user'?270:90;
  const h='إذا كانت الصورة جانبية: اضغط «تدوير الصورة»، أو وجّه الكاميرا نحو وجه ليُضبط تلقائياً.';note(h);setTimeout(()=>{if($('#bgm').textContent===h)note('')},9000);
 }
-async function calib(v){ // يجرّب الاتجاهات الأربعة ويختار الأعلى ثقة في وجود وجه
- const c=document.createElement('canvas'),x=c.getContext('2d'),vw=v.videoWidth,vh=v.videoHeight,k=Math.min(1,480/Math.max(vw,vh));
- let best=0,bt=ROT;
+async function calib(v){ // لا يغيّر الاتجاه إلا إذا كان اتجاه آخر أوضح بكثير في إظهار الوجه
+ const c=document.createElement('canvas'),x=c.getContext('2d'),vw=v.videoWidth,vh=v.videoHeight,k=Math.min(1,480/Math.max(vw,vh)),S=[];
  for(const th of [0,90,180,270]){
   const q=th%180===0;c.width=Math.round((q?vw:vh)*k);c.height=Math.round((q?vh:vw)*k);
   x.save();x.translate(c.width/2,c.height/2);x.rotate(th*Math.PI/180);x.drawImage(v,-vw*k/2,-vh*k/2,vw*k,vh*k);x.restore();
-  const f=await faceapi.detectAllFaces(c,opts(320,.3)),sc=Math.max(0,...f.map(d=>d.score));
-  if(sc>best){best=sc;bt=th}
+  const f=await faceapi.detectAllFaces(c,opts(320,.3));S.push(Math.max(0,...f.map(d=>d.score)));
  }
- if(best>=.5){
-  if(bt!==ROT){ROT=bt;lastBox=null;lastVer=0;flash('تم تصحيح اتجاه الصورة تلقائياً')}
-  calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}
- }
+ const cur=S[((ROT%360)/90)|0],best=Math.max(...S),bt=S.indexOf(best)*90;
+ if(best>=.6&&bt!==ROT&&best>cur+.2){const odd=Math.abs(bt-ROT)%180!==0;ROT=bt;lastBox=null;lastVer=0;if(odd)rebuild();flash('تم تصحيح اتجاه الصورة تلقائياً')}
+ if(best>=.6){calibrated=true;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}}
 }
-$('#rot').onclick=()=>{ROT=(ROT+90)%360;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
+$('#rot').onclick=()=>{ROT=(ROT+90)%360;rebuild();calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
+$('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');
+$('#fill').onclick=()=>{FILL=!FILL;try{localStorage.setItem('fill',FILL?'1':'0')}catch(e){}$('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');rebuild()};
 $('#rot2').onclick=()=>$('#rot').onclick();
 $('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
@@ -325,7 +326,7 @@ $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
 /* ---------- الرسم والتسجيل (لوحة واحدة = فيديو واحد) ---------- */
 function cover(src,sw,sh,z){const k=Math.max(cvs.width/sw,cvs.height/sh)*(z||1),w=sw*k,h=sh*k;cx.drawImage(src,(cvs.width-w)/2,(cvs.height-h)/2,w,h)}
 function drawV(ctx,src,sw,sh,z){
- const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,k=Math.min(W/ew,H/eh)*(z||1);
+ const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,k=(FILL?Math.max:Math.min)(W/ew,H/eh)*(z||1);
  ctx.save();ctx.translate(W/2,H/2);ctx.rotate(ROT*Math.PI/180);if(MIR)ctx.scale(-1,1);
  ctx.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);ctx.restore();
 }
@@ -334,13 +335,12 @@ function paint(t){
  requestAnimationFrame(paint);
  if(t-lastPaint<33)return;lastPaint=t;
  const v=$('#v');if(!v.videoWidth)return;
- if(!cvs.width){const por=innerHeight>=innerWidth,L=1080,S=Math.round(L*9/16);cvs.width=por?S:L;cvs.height=por?L:S}
+ if(!cvs.width){const q=ROT%180===0,fw=q?v.videoWidth:v.videoHeight,fh=q?v.videoHeight:v.videoWidth,k=Math.min(1,1080/Math.max(fw,fh));
+  if(FILL){cvs.width=por()?608:1080;cvs.height=por()?1080:608}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
  else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height);drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
 }
-function beginRec(){
- mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
- chunks=[];recMs=0;lastSeen=0;lastBox=null;running=true;rec=null;cvs.width=0;drawOn=true;updPrev();requestAnimationFrame(paint);
+function startRecorder(){
  let tries=0;const w=setInterval(()=>{
   if(cvs.width||++tries>40){clearInterval(w);if(!running)return;
    const out=new MediaStream([...cvs.captureStream(30).getVideoTracks(),...(dest?dest.stream.getAudioTracks():[])]);
@@ -349,7 +349,32 @@ function beginRec(){
    rec.onerror=()=>note('حدث خطأ في المسجّل');
    rec.start(1000);rec.pause();setStatus(false);look(++gen);
   }},100);
- clearInterval(timer);timer=setInterval(()=>{if(rec&&rec.state==='recording')recMs+=500;const s=Math.floor(recMs/1000);$('#tm').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+}
+function rebuild(){
+ if(!running||!rec)return false;
+ if(recMs===0&&chunks.length===0){
+  try{rec.ondataavailable=null;rec.onstop=null;if(rec.state!=='inactive')rec.stop()}catch(e){}
+  rec=null;gen++;cvs.width=0;startRecorder();return true;
+ }
+ flash('سيظهر الشكل الجديد في الفيديو التالي. أنهِ هذا الفيديو وابدأ من جديد.');return false;
+}
+function dbgUpd(){const v=$('#v');$('#dbg').textContent='كاميرا '+v.videoWidth+'×'+v.videoHeight+' | شاشة '+(por()?'عمودي':'أفقي')+' | تدوير '+ROT+'° | لوحة '+cvs.width+'×'+cvs.height}
+async function reorient(){
+ if(!running||!rec||!cvs.width)return;
+ if(por()===(cvs.height>=cvs.width))return;
+ if(recMs===0&&chunks.length===0){ // لم يُسجَّل شيء بعد: نعيد الإعداد بالاتجاه الجديد
+  try{rec.ondataavailable=null;rec.onstop=null;if(rec.state!=='inactive')rec.stop()}catch(e){}
+  rec=null;gen++;cvs.width=0;
+  try{await startCam()}catch(e){}
+  startRecorder();
+ }else flash('غيّرتَ اتجاه الجوال أثناء التسجيل. أنهِ الفيديو وابدأ من جديد ليأخذ الاتجاه الجديد.');
+}
+let rto;window.addEventListener('resize',()=>{clearTimeout(rto);rto=setTimeout(reorient,500)});
+function beginRec(){
+ mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+ chunks=[];recMs=0;lastSeen=0;lastBox=null;running=true;rec=null;cvs.width=0;drawOn=true;updPrev();requestAnimationFrame(paint);
+ startRecorder();
+ clearInterval(timer);timer=setInterval(()=>{if(rec&&rec.state==='recording')recMs+=500;dbgUpd();const s=Math.floor(recMs/1000);$('#tm').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
  if(navigator.wakeLock)navigator.wakeLock.request('screen').then(x=>wake=x).catch(()=>{});
 }
 function setStatus(on){$('#st').className='pill'+(on?' on':'');$('#stt').textContent=on?'التسجيل شغال':'متوقف: بانتظار الشخص'}
@@ -384,7 +409,7 @@ async function look(g){
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
    if(rec.state==='paused')$('#stt').textContent='متوقف: '+(n?'أرى '+n+' وجه وليس الشخص المطلوب':'لا أرى أي وجه');
-   if(!calibrated){if(ms>=.6){calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}}else if(++calN>=4){calN=0;await calib(v)}}
+   if(!calibrated){if(ms>=.6){calibrated=true;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}}else if(++calN>=4){calN=0;await calib(v)}}
    errN=0;
   }
  }catch(e){
