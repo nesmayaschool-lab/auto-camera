@@ -61,7 +61,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 13</p>
+<p style="text-align:center;font-size:15px">الإصدار 14</p>
 </section>
 
 <section id="person" hidden>
@@ -280,8 +280,24 @@ $('#flip').onclick=async()=>{
  look(++gen);
 };
 function updPrev(){cvs.hidden=!running;$('#pg').hidden=!bg}
-function autoRot(){const v=$('#v');ROT=0;MIR=false;if(v.videoWidth&&innerHeight>=innerWidth&&v.videoWidth>v.videoHeight)ROT=facing==='user'?270:90}
-$('#rot').onclick=()=>{ROT=(ROT+90)%360;flash('تدوير '+ROT+'°')};
+let calibrated=false,calN=0;
+function autoRot(){
+ const v=$('#v');ROT=0;MIR=false;calN=0;calibrated=false;
+ const sv=localStorage.getItem('rot_'+facing); // اتجاه صحّحته أنت سابقاً لهذه الكاميرا
+ if(sv!==null){ROT=+sv||0;calibrated=true;return}
+ if(v.videoWidth&&innerHeight>=innerWidth&&v.videoWidth>v.videoHeight)ROT=facing==='user'?270:90;
+}
+async function calib(v){ // يجرّب الاتجاهات الأربعة حتى يجد وجهاً، فيعتمد الاتجاه الصحيح
+ const c=document.createElement('canvas'),x=c.getContext('2d'),vw=v.videoWidth,vh=v.videoHeight,k=Math.min(1,480/Math.max(vw,vh));
+ for(const th of [0,90,270,180]){
+  if(th===ROT)continue;const q=th%180===0;
+  c.width=Math.round((q?vw:vh)*k);c.height=Math.round((q?vh:vw)*k);
+  x.save();x.translate(c.width/2,c.height/2);x.rotate(th*Math.PI/180);x.drawImage(v,-vw*k/2,-vh*k/2,vw*k,vh*k);x.restore();
+  const f=await faceapi.detectAllFaces(c,opts(320,.4));
+  if(f.length){ROT=th;calibrated=true;lastBox=null;lastVer=0;flash('تم تصحيح اتجاه الصورة تلقائياً');return}
+ }
+}
+$('#rot').onclick=()=>{ROT=(ROT+90)%360;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
 $('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
@@ -336,9 +352,10 @@ async function look(g){
  try{
   const v=$('#v');
   if(rec&&v.videoWidth&&v.readyState>=2){
-   const sw=v.videoWidth/DZ,sh=v.videoHeight/DZ,k=Math.min(1,640/Math.max(sw,sh));
-   dc.width=Math.round(sw*k);dc.height=Math.round(sh*k);
-   dx.drawImage(v,(v.videoWidth-sw)/2,(v.videoHeight-sh)/2,sw,sh,0,0,dc.width,dc.height);
+   const sw=v.videoWidth/DZ,sh=v.videoHeight/DZ,k=Math.min(1,640/Math.max(sw,sh)),q=ROT%180===0,dw=sw*k,dh=sh*k;
+   dc.width=Math.round(q?dw:dh);dc.height=Math.round(q?dh:dw);
+   dx.save();dx.translate(dc.width/2,dc.height/2);dx.rotate(ROT*Math.PI/180);
+   dx.drawImage(v,(v.videoWidth-sw)/2,(v.videoHeight-sh)/2,sw,sh,-dw/2,-dh/2,dw,dh);dx.restore();
    const L=LV[lv],now=Date.now();let hit=false,n=0;
    if(lastBox&&now-lastT<=5000&&now-lastVer<1500){ // فحص خفيف: هل يوجد وجه قرب آخر مكان؟
     const bs=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)),timeout(4000)]);
@@ -355,6 +372,7 @@ async function look(g){
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
    if(rec.state==='paused')$('#stt').textContent='متوقف: '+(n?'أرى '+n+' وجه وليس الشخص المطلوب':'لا أرى أي وجه');
+   if(!calibrated){if(n>0)calibrated=true;else if(++calN>=4){calN=0;await calib(v)}}
    errN=0;
   }
  }catch(e){
