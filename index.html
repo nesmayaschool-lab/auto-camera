@@ -54,7 +54,7 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 .on .dot{background:#FF5252}
 #tm{font-size:26px}
 #stage{position:absolute;inset:0;border-radius:0;overflow:hidden;background:#000;touch-action:none}
-#stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 #stage video{opacity:0}
 #side{position:absolute;right:6px;top:84px;z-index:6;max-height:calc(100% - 470px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
 #side .g{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -62,7 +62,7 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 #cam .sb{width:104px;height:54px;min-height:54px;border-radius:14px;padding:0 4px;font-size:20px;background:rgba(0,0,0,.72);border-width:2px}
 textarea.in{min-height:110px;resize:vertical}
 #toast{position:fixed;left:14px;right:14px;bottom:90px;background:#222;color:#fff;padding:14px;border-radius:14px;font-size:20px;text-align:center;z-index:50}
-#sheet{position:fixed;left:8px;right:8px;top:70px;bottom:8px;z-index:20;overflow-y:auto;background:rgba(10,22,48,.96);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
+#sheet{position:fixed;left:8px;right:8px;bottom:8px;top:auto;max-height:52%;z-index:20;overflow-y:auto;background:rgba(10,22,48,.93);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
 <body>
@@ -70,7 +70,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 19</p>
+<p style="text-align:center;font-size:15px">الإصدار 20</p>
 </section>
 
 <section id="person" hidden>
@@ -106,7 +106,7 @@ textarea.in{min-height:110px;resize:vertical}
 </div>
 <div class="cambot">
 <p id="bgm"></p>
-<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="fill" style="flex:1 1 30%">ملء الشاشة: لا</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
+<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="fill" style="flex:1 1 30%">حجم الصورة: كامل المشهد</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
 <button id="dat">عرض البيانات</button>
 <button class="stop" id="end">إنهاء التصوير</button>
 <p id="dbg" style="font-size:12px;color:#9ca3af;min-height:14px"></p>
@@ -147,7 +147,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• رجوع: يوقف التصوير ويحفظ ما صُوّر.</span>
 <span>• قلب الكاميرا: أمامية أو خلفية بدون قطع الفيديو.</span>
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
-<span>• ملء الشاشة: «نعم» يملأ الفيديو كل الشاشة (قد يقصّ الجوانب)، و«لا» يُظهر المشهد كاملاً بحدوده الأصلية.</span>
+<span>• حجم الصورة: «كامل المشهد» بدون تكبير، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس الصورة.</span>
 <span>• أعلى / أخفض: يرفع أو يخفض صوت المايك. كتم: يوقف الصوت.</span>
 <span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
@@ -176,7 +176,7 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FILL=localStorage.getItem('fill')!=='0',people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
@@ -323,8 +323,9 @@ async function calib(v){ // لا يغيّر الاتجاه إلا إذا كان 
  if(best>=.6){calibrated=true;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}}
 }
 $('#rot').onclick=()=>{ROT=(ROT+90)%360;rebuild();calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
-$('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');
-$('#fill').onclick=()=>{FILL=!FILL;try{localStorage.setItem('fill',FILL?'1':'0')}catch(e){}$('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');rebuild()};
+const FML=['كامل المشهد','متوسط','ملء الشاشة'];
+$('#fill').textContent='حجم الصورة: '+FML[FM];
+$('#fill').onclick=()=>{FM=(FM+1)%3;try{localStorage.setItem('fm',FM)}catch(e){}$('#fill').textContent='حجم الصورة: '+FML[FM];rebuild()};
 $('#rot2').onclick=()=>$('#rot').onclick();
 $('#hide').onclick=()=>{const c=$('#cam');c.classList.toggle('nui');$('#hide').textContent=c.classList.contains('nui')?'إظهار الأزرار':'إخفاء'};
 $('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
@@ -341,8 +342,8 @@ $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
 
 /* ---------- الرسم والتسجيل (لوحة واحدة = فيديو واحد) ---------- */
 function cover(src,sw,sh,z){const k=Math.max(cvs.width/sw,cvs.height/sh)*(z||1),w=sw*k,h=sh*k;cx.drawImage(src,(cvs.width-w)/2,(cvs.height-h)/2,w,h)}
-function drawV(ctx,src,sw,sh,z){
- const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,k=(FILL?Math.max:Math.min)(W/ew,H/eh)*(z||1);
+function drawV(ctx,src,sw,sh,z,fm){
+ const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,a=W/ew,b=H/eh,lo=Math.min(a,b),hi=Math.max(a,b),f=(fm===undefined?FM:fm),k=(f===2?hi:f===1?lo+(hi-lo)*.5:lo)*(z||1);
  ctx.save();ctx.translate(W/2,H/2);ctx.rotate(ROT*Math.PI/180);if(MIR)ctx.scale(-1,1);
  ctx.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);ctx.restore();
 }
@@ -352,7 +353,7 @@ function paint(t){
  if(t-lastPaint<33)return;lastPaint=t;
  const v=$('#v');if(!v.videoWidth)return;
  if(!cvs.width){const q=ROT%180===0,fw=q?v.videoWidth:v.videoHeight,fh=q?v.videoHeight:v.videoWidth,k=Math.min(1,1080/Math.max(fw,fh));
-  if(FILL){const L=1200,a=Math.max(.4,Math.min(.8,Math.min(innerWidth,innerHeight)/Math.max(innerWidth,innerHeight))),m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
+  if(FM>0){const L=1080,m=608;cvs.width=por()?m:L;cvs.height=por()?L:m}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
  else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height);drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
 }
@@ -442,8 +443,8 @@ function onSeg(r){
  const v=$('#v'),m=r.segmentationMask,W=cvs.width,H=cvs.height;if(!W||!v.videoWidth)return;
  if(pc.width!==W||pc.height!==H){pc.width=W;pc.height=H}
  pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,W,H);
- drawV(pcx,m,v.videoWidth,v.videoHeight,DZ);
- pcx.globalCompositeOperation='source-in';drawV(pcx,v,v.videoWidth,v.videoHeight,DZ);
+ drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,0);
+ pcx.globalCompositeOperation='source-in';drawV(pcx,v,v.videoWidth,v.videoHeight,DZ,0);
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
  const pw=W*ps,ph=H*ps;cx.drawImage(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
@@ -465,7 +466,7 @@ $('#bgf').onchange=async e=>{
   await loadSeg();const url=URL.createObjectURL(f);
   if(f.type.startsWith('video')){bgv.src=url;await bgv.play();bg=bgv;bgType='video'}
   else{const im=new Image();im.src=url;await im.decode();bg=im;bgType='img'}
-  ps=.6;pxc=.5;pyc=.6;updPrev();$('#nobg').hidden=false;note('');
+  ps=1;pxc=.5;pyc=.62;updPrev();$('#nobg').hidden=false;note('');
   flash('حرّك الشخص بإصبعك، وكبّره بإصبعين أو بزر حجمك');
  }catch(er){note('تعذّر تجهيز الخلفية. تأكد من الإنترنت وجرّب مرة أخرى.')}
 };
@@ -499,7 +500,8 @@ if(!(theme>=0&&theme<THEMES.length))theme=0;
 function rr(o,x,y,w,h,r){o.beginPath();o.moveTo(x+r,y);o.arcTo(x+w,y,x+w,y+h,r);o.arcTo(x+w,y+h,x,y+h,r);o.arcTo(x,y+h,x,y,r);o.arcTo(x,y,x+w,y,r);o.closePath()}
 function fit(o,txt,maxW,size){let s=Math.round(size);for(;s>14;s-=2){o.font='700 '+s+'px Cairo,sans-serif';if(o.measureText(txt).width<=maxW)break}o.font='700 '+s+'px Cairo,sans-serif'}
 function shade(h,f){const n=parseInt(h.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=f<0?0:255,p=Math.abs(f);r=Math.round((t-r)*p+r);g=Math.round((t-g)*p+g);b=Math.round((t-b)*p+b);return 'rgb('+r+','+g+','+b+')'}
-function sprite(title,text,color,w,h,u,pad){
+function sprite(title,text,color,w,h,u,pad,inset){
+ inset=inset||0;
  const c=document.createElement('canvas');c.width=Math.ceil(w+2*pad);c.height=Math.ceil(h+2*pad);const o=c.getContext('2d');
  const x=pad,y=pad,r=h*.3;
  o.save();o.shadowColor=color;o.shadowBlur=pad*.7;
@@ -509,27 +511,58 @@ function sprite(title,text,color,w,h,u,pad){
  const gl=o.createLinearGradient(0,y,0,y+h*.5);gl.addColorStop(0,'rgba(255,255,255,.45)');gl.addColorStop(1,'rgba(255,255,255,0)');
  rr(o,x+5*u,y+4*u,w-10*u,h*.46,r*.8);o.fillStyle=gl;o.fill();
  o.direction='rtl';o.textAlign='center';o.textBaseline='middle';o.shadowColor='rgba(0,0,0,.55)';o.shadowBlur=4*u;
- const mx=x+w/2;
- if(title&&text){fit(o,title,w*.88,h*.27);o.fillStyle='#FFF3B0';o.fillText(title,mx,y+h*.3);fit(o,text,w*.88,h*.4);o.fillStyle='#fff';o.fillText(text,mx,y+h*.7)}
- else{const t=title||text;fit(o,t,w*.88,h*.44);o.fillStyle='#fff';o.fillText(t,mx,y+h*.52)}
+ const mx=x+w/2,ty=y+inset,th=h-inset;
+ if(title&&text){fit(o,title,w*.88,th*.27);o.fillStyle='#FFF3B0';o.fillText(title,mx,ty+th*.3);fit(o,text,w*.88,th*.4);o.fillStyle='#fff';o.fillText(text,mx,ty+th*.7)}
+ else{const t=title||text;fit(o,t,w*.88,th*.44);o.fillStyle='#fff';o.fillText(t,mx,ty+th*.52)}
+ return c;
+}
+function bigPanel(name,items,color,w,h,hh,u,pad){
+ const c=document.createElement('canvas');c.width=Math.ceil(w+2*pad);c.height=Math.ceil(h+2*pad);const o=c.getContext('2d'),x=pad,y=pad,r=26*u;
+ o.save();o.shadowColor=color;o.shadowBlur=pad*.7;
+ const g=o.createLinearGradient(0,y,0,y+h);g.addColorStop(0,shade(color,.15));g.addColorStop(1,shade(color,-.55));
+ rr(o,x,y,w,h,r);o.fillStyle=g;o.fill();o.restore();
+ o.save();rr(o,x,y,w,h,r);o.clip();
+ const hg=o.createLinearGradient(0,y,0,y+hh);hg.addColorStop(0,shade(color,.5));hg.addColorStop(1,color);o.fillStyle=hg;o.fillRect(x,y,w,hh);
+ const gl=o.createLinearGradient(0,y,0,y+hh*.9);gl.addColorStop(0,'rgba(255,255,255,.45)');gl.addColorStop(1,'rgba(255,255,255,0)');o.fillStyle=gl;o.fillRect(x,y,w,hh*.9);
+ const rh=(h-hh)/Math.max(items.length,1);
+ items.forEach((it,i)=>{if(i%2===0){o.fillStyle='rgba(255,255,255,.09)';o.fillRect(x,y+hh+i*rh,w,rh)}});
+ o.restore();
+ o.lineWidth=3*u;o.strokeStyle=shade(color,.65);rr(o,x,y,w,h,r);o.stroke();
+ o.direction='rtl';o.textBaseline='middle';o.shadowColor='rgba(0,0,0,.55)';o.shadowBlur=4*u;
+ o.textAlign='center';fit(o,name,w*.9,hh*.6);o.fillStyle='#fff';o.fillText(name,x+w/2,y+hh/2);
+ items.forEach((it,i)=>{const cy=y+hh+i*rh+rh/2;
+  o.textAlign='right';fit(o,it[0],w*.5,rh*.5);o.fillStyle='#FFF3B0';o.fillText(it[0],x+w-22*u,cy);
+  o.textAlign='left';fit(o,it[1],w*.38,rh*.55);o.fillStyle='#fff';o.fillText(it[1],x+22*u,cy)});
  return c;
 }
 // الشاشة الرئيسية تظهر أولاً، ثم تنسدل منها الشاشات الفرعية واحدة بعد الأخرى بألوان مختلفة
+const MODELS=[{n:'فردي',k:1},{n:'ثنائي',k:2},{n:'ثلاثي',k:3},{n:'شاشة كبيرة',k:4}];
+let mdl=+(localStorage.getItem('model1')||1),selFor=null;if(!(mdl>=0&&mdl<MODELS.length))mdl=1;
 function buildOvl(row){
- const W=cvs.width,H=cvs.height,u=W/720,cols=THEMES[theme].c,pad=30*u;
- const si=[...selCols].filter(i=>i<dataset.cols.length&&(row[i]||'')!=='').sort((a,b)=>a-b).slice(0,8),n=si.length;
- const mw=W*.88,mx=(W-mw)/2,mh=Math.max(H*.09,100*u),gap=12*u,cs=n>4?2:1,rows=Math.ceil(n/cs);
- let sh=Math.max(H*.07,76*u);sh=Math.max(Math.min(sh,(H*.5-(rows-1)*gap)/Math.max(rows,1)),50*u);
- const total=mh+(n?gap+rows*sh+(rows-1)*gap:0),y0=H-H*.05-total,sw=(mw-gap*(cs-1))/cs;
- const main={x:mx,y:y0,w:mw,h:mh,pad,c:sprite(row[0],'',cols[0],mw,mh,u,pad)};
- const subs=si.map((ci,k)=>({x:mx+(k%cs)*(sw+gap),y:y0+mh+gap+Math.floor(k/cs)*(sh+gap),w:sw,h:sh,pad,c:sprite(dataset.cols[ci],row[ci],cols[(k+1)%cols.length],sw,sh,u,pad)}));
- ovl={main,subs,t0:performance.now()};
+ const W=cvs.width,H=cvs.height,u=W/720,cols=THEMES[theme].c,pad=30*u,t0=performance.now();
+ const si=[...selCols].filter(i=>i<dataset.cols.length&&(row[i]||'')!=='').sort((a,b)=>a-b),k=MODELS[mdl].k;
+ if(k===4){ // شاشة كبيرة: بيانات أكثر
+  const items=si.slice(0,8).map(i=>[dataset.cols[i],row[i]]),w=W*.9,hh=Math.max(H*.07,80*u);
+  let rh=Math.max(H*.05,56*u);const h=Math.min(hh+Math.max(items.length,1)*rh,H*.55);
+  ovl={kind:4,t0,subs:[],main:{x:(W-w)/2,y:H-H*.05-h,w,h,pad,c:bigPanel(row[0],items,cols[0],w,h,hh,u,pad)}};return;
+ }
+ if(k===1){ // استيكر واحد
+  const mh=Math.max(H*.1,112*u),w=W*.8,st=si.length?dataset.cols[si[0]]+': '+row[si[0]]:'';
+  ovl={kind:1,t0,subs:[],main:{x:(W-w)/2,y:H-H*.06-mh,w,h:mh,pad,c:sprite(st,row[0],cols[0],w,mh,u,pad,0)}};return;
+ }
+ // ثنائي/ثلاثي: الاستيكرات ملتصقة، كل فرعي يخرج من أسفل السابق ويظهر جزء منه
+ const n=Math.min(k-1,si.length),mw=W*.88,mx=(W-mw)/2,mh=Math.max(H*.085,96*u),sh=Math.max(H*.075,84*u),tuck=sh*.34,step=sh-tuck,y0=H-H*.06-(mh+n*step);
+ const main={x:mx,y:y0,w:mw,h:mh,pad,c:sprite(row[0],'',cols[0],mw,mh,u,pad,0)};
+ const subs=si.slice(0,n).map((ci,i)=>{const w=mw*(1-.05*(i+1));return{x:mx+(mw-w)/2,y:y0+mh-tuck+i*step,w,h:sh,pad,c:sprite(dataset.cols[ci],row[ci],cols[(i+1)%cols.length],w,sh,u,pad,tuck)}});
+ ovl={kind:k,t0,main,subs};
 }
 const ease=t=>1-Math.pow(1-t,3);
 function drawOvl(){
- if(!ovl)return;const t=(performance.now()-ovl.t0)/1000,m=ovl.main,sy=m.y+m.h*.55;
- ovl.subs.forEach((sp,i)=>{const p=ease(Math.min(1,Math.max(0,(t-.35-i*.18)/.45)));if(p<=0)return;cx.globalAlpha=p;cx.drawImage(sp.c,sp.x-sp.pad,sy+(sp.y-sy)*p-sp.pad)});
- const pm=ease(Math.min(1,t/.35)),sc=.88+.12*pm,w2=(m.w+2*m.pad)*sc,h2=(m.h+2*m.pad)*sc;
+ if(!ovl)return;const t=(performance.now()-ovl.t0)/1000,m=ovl.main;
+ if(ovl.kind===4){const p=ease(Math.min(1,t/.5));cx.globalAlpha=p;cx.drawImage(m.c,m.x-m.pad,m.y-m.pad+(1-p)*70*(cvs.width/720));cx.globalAlpha=1;return}
+ const sy=m.y+m.h*.3;
+ for(let i=ovl.subs.length-1;i>=0;i--){const sp=ovl.subs[i],p=ease(Math.min(1,Math.max(0,(t-.35-i*.2)/.45)));if(p<=0)continue;cx.globalAlpha=Math.min(1,p*1.5);cx.drawImage(sp.c,sp.x-sp.pad,sy+(sp.y-sy)*p-sp.pad)}
+ const pm=ease(Math.min(1,t/.35)),sc=.9+.1*pm,w2=(m.w+2*m.pad)*sc,h2=(m.h+2*m.pad)*sc;
  cx.globalAlpha=pm;cx.drawImage(m.c,m.x+m.w/2-w2/2,m.y+m.h/2-h2/2,w2,h2);cx.globalAlpha=1;
 }
 async function showOvl(row){try{await document.fonts.load('700 30px Cairo')}catch(e){}buildOvl(row);updPrev()}
@@ -611,15 +644,21 @@ function openSheet(){
   sh.appendChild(btn('إضافة ملف بيانات',()=>$('#dfile').click(),'main'));sh.appendChild(btn('إغلاق',close));return;
  }
  const nc=dataset.cols.length;
- if(ovl)sh.appendChild(btn('إخفاء الشاشات الحالية',()=>{ovl=null;updPrev();close()},'stop'));
- lab('١) اختر الألوان:');
+ if(selFor!==dataset){selCols=new Set();for(let i=1;i<nc;i++)selCols.add(i);selFor=dataset}
+ if(ovl)sh.appendChild(btn('إخفاء الاستيكرات الحالية',()=>{ovl=null;updPrev();close()},'stop'));
+ lab('شكل الاستيكر:');
+ const mb=document.createElement('div');mb.className='bar';mb.style.flexWrap='wrap';
+ MODELS.forEach((m,i)=>{const b=btn(m.n,()=>{mdl=i;try{localStorage.setItem('model1',i)}catch(e){}openSheet()},i===mdl?'main':'');b.style.cssText='width:48%;min-height:50px;font-size:18px';mb.appendChild(b)});
+ sh.appendChild(mb);
+ lab('الألوان:');
  const tb=document.createElement('div');tb.className='bar';tb.style.flexWrap='wrap';
  THEMES.forEach((t,i)=>{const b=btn(t.n,()=>{theme=i;try{localStorage.setItem('theme1',i)}catch(e){}openSheet()});b.style.cssText='width:31%;min-height:48px;font-size:17px;color:#fff;border:4px solid '+(i===theme?'#fff':'transparent')+';background:linear-gradient(135deg,'+t.c[0]+','+t.c[2]+')';tb.appendChild(b)});
  sh.appendChild(tb);
- lab('٢) الشاشات الفرعية التي تنسدل (اضغط للتحديد):');
- if(nc<2)lab('الملف فيه عمود واحد فقط (الاسم)، لذلك تظهر شاشة رئيسية فقط.');
- for(let i=1;i<nc;i++)sh.appendChild(btn((selCols.has(i)?'✓ ':'')+dataset.cols[i],()=>{selCols.has(i)?selCols.delete(i):selCols.add(i);openSheet()},selCols.has(i)?'main':''));
- lab('٣) اضغط على الاسم لإظهاره:');
+ if(nc>1){lab('المعلومات المستخدمة (اضغط للتحديد أو الإلغاء):');
+  const cb=document.createElement('div');cb.className='bar';cb.style.flexWrap='wrap';
+  for(let i=1;i<nc;i++){const b=btn((selCols.has(i)?'✓ ':'')+dataset.cols[i],()=>{selCols.has(i)?selCols.delete(i):selCols.add(i);openSheet()},selCols.has(i)?'main':'');b.style.cssText='flex:1 1 40%;min-height:46px;font-size:17px';cb.appendChild(b)}
+  sh.appendChild(cb)}
+ lab('اضغط على الاسم لإظهاره:');
  const q=document.createElement('input');q.className='in';q.placeholder='بحث بالاسم';sh.appendChild(q);
  const list=document.createElement('div');list.className='col';sh.appendChild(list);
  const fill=()=>{list.innerHTML='';dataset.rows.filter(r=>!q.value||r[0].includes(q.value)).slice(0,100).forEach(r=>list.appendChild(btn(r[0],()=>showRow(r),'main')))};
