@@ -61,7 +61,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 15</p>
+<p style="text-align:center;font-size:15px">الإصدار 16</p>
 </section>
 
 <section id="person" hidden>
@@ -95,7 +95,7 @@ textarea.in{min-height:110px;resize:vertical}
 <div id="sheet" hidden></div>
 </div>
 <p id="bgm"></p>
-<div class="bar"><button id="flip">قلب الكاميرا</button><button id="bg">الخلفية</button><button id="nobg" hidden>بدون خلفية</button></div>
+<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
 <button id="dat">عرض البيانات</button>
 <button class="stop" id="end">إنهاء التصوير</button>
 </section>
@@ -219,6 +219,11 @@ $('#lv').textContent='الحساسية: '+LV[lv].n;
 $('#gr').textContent='مهلة الإيقاف: '+GRL[gri];
 $('#gr').onclick=()=>{gri=(gri+1)%3;localStorage.setItem('gr',gri);$('#gr').textContent='مهلة الإيقاف: '+GRL[gri]};
 $('#lv').onclick=()=>{lv=(lv+1)%3;localStorage.setItem('lv',lv);$('#lv').textContent='الحساسية: '+LV[lv].n};
+async function shrink(f){ // تصغير الصورة قبل التحليل لتسريعه
+ let src;try{src=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){src=await faceapi.bufferToImage(f)}
+ const w=src.width||src.naturalWidth,h=src.height||src.naturalHeight,k=Math.min(1,800/Math.max(w,h));
+ const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c;
+}
 function msg(t){$('#msg').textContent=t||''}
 const opts=(n,s)=>new faceapi.TinyFaceDetectorOptions({inputSize:n,scoreThreshold:s||.5});
 async function loadModels(){if(ready)return;if(!window.faceapi)throw new Error('لم يتم تحميل مكتبة الوجوه. تأكد من الإنترنت.');
@@ -226,12 +231,13 @@ async function loadModels(){if(ready)return;if(!window.faceapi)throw new Error('
 
 $('#file').onchange=async e=>{
  const files=[...e.target.files];if(!files.length)return;
- msg('جاري تحليل الصور...');$('#next').disabled=true;
+ msg('جاري تجهيز أداة التعرف على الوجه (أول مرة تأخذ وقتاً)...');$('#next').disabled=true;
  try{await loadModels()}catch(er){msg(er.message);return}
- let bad=0;const ids=[];
+ let bad=0,ix=0;const ids=[];
  for(const f of files){
-  const img=await faceapi.bufferToImage(f);
-  const d=await faceapi.detectSingleFace(img,opts(608,.3)).withFaceLandmarks(true).withFaceDescriptor();
+  msg('جاري تحليل الصورة '+(++ix)+' من '+files.length+'...');
+  const img=await shrink(f);
+  const d=await faceapi.detectSingleFace(img,opts(512,.3)).withFaceLandmarks(true).withFaceDescriptor();
   if(!d){bad++;continue}
   const b=d.detection.box,c=document.createElement('canvas');c.width=c.height=96;
   const sz=Math.max(b.width,b.height)*1.2;
@@ -270,7 +276,7 @@ async function startCam(){
  const v=$('#v');v.srcObject=null;const P=innerHeight>innerWidth;
  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:1280},height:{ideal:P?1280:720},frameRate:{ideal:24,max:30}},audio:false});
  v.srcObject=stream;await v.play();autoRot();
- zoom=1;DZ=facing==='user'?.8:1;lastBox=null;lastVer=0;updPrev();
+ zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
 }
 $('#flip').onclick=async()=>{
  if(!running)return;const prev=facing;facing=facing==='user'?'environment':'user';flash('جاري قلب الكاميرا...');gen++;lastSeen=Date.now()+1500;
@@ -286,18 +292,24 @@ function autoRot(){
  const sv=localStorage.getItem('rot_'+facing); // اتجاه صحّحته أنت سابقاً لهذه الكاميرا
  if(sv!==null){ROT=+sv||0;calibrated=true;return}
  if(v.videoWidth&&innerHeight>=innerWidth&&v.videoWidth>v.videoHeight)ROT=facing==='user'?270:90;
+ const h='إذا كانت الصورة جانبية: اضغط «تدوير الصورة»، أو وجّه الكاميرا نحو وجه ليُضبط تلقائياً.';note(h);setTimeout(()=>{if($('#bgm').textContent===h)note('')},9000);
 }
-async function calib(v){ // يجرّب الاتجاهات الأربعة حتى يجد وجهاً، فيعتمد الاتجاه الصحيح
+async function calib(v){ // يجرّب الاتجاهات الأربعة ويختار الأعلى ثقة في وجود وجه
  const c=document.createElement('canvas'),x=c.getContext('2d'),vw=v.videoWidth,vh=v.videoHeight,k=Math.min(1,480/Math.max(vw,vh));
- for(const th of [0,90,270,180]){
-  if(th===ROT)continue;const q=th%180===0;
-  c.width=Math.round((q?vw:vh)*k);c.height=Math.round((q?vh:vw)*k);
+ let best=0,bt=ROT;
+ for(const th of [0,90,180,270]){
+  const q=th%180===0;c.width=Math.round((q?vw:vh)*k);c.height=Math.round((q?vh:vw)*k);
   x.save();x.translate(c.width/2,c.height/2);x.rotate(th*Math.PI/180);x.drawImage(v,-vw*k/2,-vh*k/2,vw*k,vh*k);x.restore();
-  const f=await faceapi.detectAllFaces(c,opts(320,.4));
-  if(f.length){ROT=th;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تم تصحيح اتجاه الصورة تلقائياً');return}
+  const f=await faceapi.detectAllFaces(c,opts(320,.3)),sc=Math.max(0,...f.map(d=>d.score));
+  if(sc>best){best=sc;bt=th}
+ }
+ if(best>=.5){
+  if(bt!==ROT){ROT=bt;lastBox=null;lastVer=0;flash('تم تصحيح اتجاه الصورة تلقائياً')}
+  calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}
  }
 }
 $('#rot').onclick=()=>{ROT=(ROT+90)%360;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
+$('#rot2').onclick=()=>$('#rot').onclick();
 $('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
@@ -305,7 +317,7 @@ async function setZoom(d){
   zoom=Math.min(c.zoom.max,Math.max(c.zoom.min,zoom+d*Math.max(.5,(c.zoom.max-c.zoom.min)/8)));
   try{await t.applyConstraints({advanced:[{zoom}]})}catch(e){}
   flash('التقريب '+zoom.toFixed(1)+'×');
- }else{DZ=Math.min(4,Math.max(.5,DZ+d*.25));updPrev();flash('التقريب '+DZ.toFixed(2)+'×')}
+ }else{DZ=Math.min(4,Math.max(.6,DZ+d*.25));updPrev();flash('التقريب '+DZ.toFixed(2)+'×')}
  lastBox=null;lastVer=0;
 }
 $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
@@ -313,7 +325,7 @@ $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
 /* ---------- الرسم والتسجيل (لوحة واحدة = فيديو واحد) ---------- */
 function cover(src,sw,sh,z){const k=Math.max(cvs.width/sw,cvs.height/sh)*(z||1),w=sw*k,h=sh*k;cx.drawImage(src,(cvs.width-w)/2,(cvs.height-h)/2,w,h)}
 function drawV(ctx,src,sw,sh,z){
- const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,k=Math.max(W/ew,H/eh)*(z||1);
+ const W=cvs.width,H=cvs.height,q=ROT%180===0,ew=q?sw:sh,eh=q?sh:sw,k=Math.min(W/ew,H/eh)*(z||1);
  ctx.save();ctx.translate(W/2,H/2);ctx.rotate(ROT*Math.PI/180);if(MIR)ctx.scale(-1,1);
  ctx.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);ctx.restore();
 }
@@ -324,7 +336,7 @@ function paint(t){
  const v=$('#v');if(!v.videoWidth)return;
  if(!cvs.width){const por=innerHeight>=innerWidth,L=1080,S=Math.round(L*9/16);cvs.width=por?S:L;cvs.height=por?L:S}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
- else{if(DZ<1){cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height)}drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
+ else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height);drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
 }
 function beginRec(){
  mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
@@ -356,14 +368,14 @@ async function look(g){
    dc.width=Math.round(q?dw:dh);dc.height=Math.round(q?dh:dw);
    dx.save();dx.translate(dc.width/2,dc.height/2);dx.rotate(ROT*Math.PI/180);
    dx.drawImage(v,(v.videoWidth-sw)/2,(v.videoHeight-sh)/2,sw,sh,-dw/2,-dh/2,dw,dh);dx.restore();
-   const L=LV[lv],now=Date.now();let hit=false,n=0;
+   const L=LV[lv],now=Date.now();let hit=false,n=0,ms=0;
    if(lastBox&&now-lastT<=5000&&now-lastVer<1500){ // فحص خفيف: هل يوجد وجه قرب آخر مكان؟
     const bs=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)),timeout(4000)]);
-    n=bs.length;const b=bs.map(d=>d.box).find(x=>nearLast(x,now));
+    n=bs.length;ms=Math.max(0,...bs.map(d=>d.score));const b=bs.map(d=>d.box).find(x=>nearLast(x,now));
     if(b){hit=true;lastBox=b;lastT=now}
    }else{ // فحص كامل: مطابقة الوجه مع الصور
     const ds=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)).withFaceLandmarks(true).withFaceDescriptors(),timeout(6000)]);
-    n=ds.length;const sc=ds.map(d=>({d,e:dist(d.descriptor)}));
+    n=ds.length;ms=Math.max(0,...ds.map(d=>d.detection.score));const sc=ds.map(d=>({d,e:dist(d.descriptor)}));
     let h=sc.filter(x=>x.e<L.th).sort((a,b)=>a.e-b.e)[0];
     if(h){if(h.e<L.th*.9&&now-lastLearn>2500&&refs.length<base+12){refs.push(h.d.descriptor);lastLearn=now}}
     else h=sc.filter(x=>x.e<L.loose&&nearLast(x.d.detection.box,now)).sort((a,b)=>a.e-b.e)[0];
@@ -372,7 +384,7 @@ async function look(g){
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
    if(rec.state==='paused')$('#stt').textContent='متوقف: '+(n?'أرى '+n+' وجه وليس الشخص المطلوب':'لا أرى أي وجه');
-   if(!calibrated){if(n>0){calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}}else if(++calN>=4){calN=0;await calib(v)}}
+   if(!calibrated){if(ms>=.6){calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}}else if(++calN>=4){calN=0;await calib(v)}}
    errN=0;
   }
  }catch(e){
@@ -617,6 +629,7 @@ function drawVids(){
   l.appendChild(d);
  });
 }
+setTimeout(()=>{if(window.faceapi)loadModels().catch(()=>{})},1200); // تحميل أداة التعرف مسبقاً في الخلفية
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
