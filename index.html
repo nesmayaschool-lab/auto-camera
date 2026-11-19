@@ -61,7 +61,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 14</p>
+<p style="text-align:center;font-size:15px">الإصدار 15</p>
 </section>
 
 <section id="person" hidden>
@@ -270,7 +270,7 @@ async function startCam(){
  const v=$('#v');v.srcObject=null;const P=innerHeight>innerWidth;
  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:1280},height:{ideal:P?1280:720},frameRate:{ideal:24,max:30}},audio:false});
  v.srcObject=stream;await v.play();autoRot();
- zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
+ zoom=1;DZ=facing==='user'?.8:1;lastBox=null;lastVer=0;updPrev();
 }
 $('#flip').onclick=async()=>{
  if(!running)return;const prev=facing;facing=facing==='user'?'environment':'user';flash('جاري قلب الكاميرا...');gen++;lastSeen=Date.now()+1500;
@@ -294,7 +294,7 @@ async function calib(v){ // يجرّب الاتجاهات الأربعة حتى 
   c.width=Math.round((q?vw:vh)*k);c.height=Math.round((q?vh:vw)*k);
   x.save();x.translate(c.width/2,c.height/2);x.rotate(th*Math.PI/180);x.drawImage(v,-vw*k/2,-vh*k/2,vw*k,vh*k);x.restore();
   const f=await faceapi.detectAllFaces(c,opts(320,.4));
-  if(f.length){ROT=th;calibrated=true;lastBox=null;lastVer=0;flash('تم تصحيح اتجاه الصورة تلقائياً');return}
+  if(f.length){ROT=th;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تم تصحيح اتجاه الصورة تلقائياً');return}
  }
 }
 $('#rot').onclick=()=>{ROT=(ROT+90)%360;calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
@@ -305,7 +305,7 @@ async function setZoom(d){
   zoom=Math.min(c.zoom.max,Math.max(c.zoom.min,zoom+d*Math.max(.5,(c.zoom.max-c.zoom.min)/8)));
   try{await t.applyConstraints({advanced:[{zoom}]})}catch(e){}
   flash('التقريب '+zoom.toFixed(1)+'×');
- }else{DZ=Math.min(4,Math.max(1,DZ+d*.25));updPrev();flash('التقريب '+DZ.toFixed(2)+'×')}
+ }else{DZ=Math.min(4,Math.max(.5,DZ+d*.25));updPrev();flash('التقريب '+DZ.toFixed(2)+'×')}
  lastBox=null;lastVer=0;
 }
 $('#zin').onclick=()=>setZoom(1);$('#zout').onclick=()=>setZoom(-1);
@@ -324,7 +324,7 @@ function paint(t){
  const v=$('#v');if(!v.videoWidth)return;
  if(!cvs.width){const por=innerHeight>=innerWidth,L=1080,S=Math.round(L*9/16);cvs.width=por?S:L;cvs.height=por?L:S}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
- else{drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
+ else{if(DZ<1){cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height)}drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
 }
 function beginRec(){
  mime=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
@@ -352,7 +352,7 @@ async function look(g){
  try{
   const v=$('#v');
   if(rec&&v.videoWidth&&v.readyState>=2){
-   const sw=v.videoWidth/DZ,sh=v.videoHeight/DZ,k=Math.min(1,640/Math.max(sw,sh)),q=ROT%180===0,dw=sw*k,dh=sh*k;
+   const dz=Math.max(1,DZ),sw=v.videoWidth/dz,sh=v.videoHeight/dz,k=Math.min(1,640/Math.max(sw,sh)),q=ROT%180===0,dw=sw*k,dh=sh*k;
    dc.width=Math.round(q?dw:dh);dc.height=Math.round(q?dh:dw);
    dx.save();dx.translate(dc.width/2,dc.height/2);dx.rotate(ROT*Math.PI/180);
    dx.drawImage(v,(v.videoWidth-sw)/2,(v.videoHeight-sh)/2,sw,sh,-dw/2,-dh/2,dw,dh);dx.restore();
@@ -372,7 +372,7 @@ async function look(g){
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
    if(rec.state==='paused')$('#stt').textContent='متوقف: '+(n?'أرى '+n+' وجه وليس الشخص المطلوب':'لا أرى أي وجه');
-   if(!calibrated){if(n>0)calibrated=true;else if(++calN>=4){calN=0;await calib(v)}}
+   if(!calibrated){if(n>0){calibrated=true;try{localStorage.setItem('rot_'+facing,ROT)}catch(e){}}else if(++calN>=4){calN=0;await calib(v)}}
    errN=0;
   }
  }catch(e){
