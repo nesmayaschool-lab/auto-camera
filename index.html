@@ -46,10 +46,12 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 #tm{font-size:26px}
 #stage{position:relative;flex:1;min-height:0;border-radius:18px;overflow:hidden;background:#000;touch-action:none}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-#side{position:absolute;right:8px;top:50%;transform:translateY(-50%);max-height:calc(100% - 12px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.4);border-radius:26px;padding:8px 5px}
+#side{position:absolute;right:6px;top:50%;transform:translateY(-50%);max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
 #side .g{display:flex;flex-direction:column;align-items:center;gap:6px}
-#side span{font-size:13px;color:#fff}
-#cam .sb{width:46px;height:46px;min-height:46px;border-radius:23px;padding:0;font-size:22px;background:rgba(0,0,0,.55);border-width:2px}
+#side span{font-size:14px;font-weight:700;color:#FDE68A}
+#cam .sb{width:78px;height:44px;min-height:44px;border-radius:12px;padding:0 4px;font-size:16px;background:rgba(0,0,0,.65);border-width:2px}
+textarea.in{min-height:110px;resize:vertical}
+#toast{position:fixed;left:14px;right:14px;bottom:90px;background:#222;color:#fff;padding:14px;border-radius:14px;font-size:20px;text-align:center;z-index:50}
 #sheet{position:absolute;left:8px;right:8px;bottom:8px;max-height:75%;overflow-y:auto;background:rgba(10,22,48,.96);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
@@ -57,8 +59,8 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
-<div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 9</p>
+<div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
+<p style="text-align:center;font-size:15px">الإصدار 10</p>
 </section>
 
 <section id="person" hidden>
@@ -68,6 +70,8 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 <div id="msg"></div>
 <div class="col">
 <label class="btn" for="file">إضافة صور من المعرض</label>
+<label class="btn" for="dfile">إضافة ملف بيانات (اختياري)</label>
+<p id="pdata" style="font-size:18px;text-align:center"></p>
 <input id="file" type="file" accept="image/*" multiple hidden>
 <button id="lv">الحساسية: متوسطة</button>
 <button class="main" id="next" disabled>حفظ والمتابعة</button>
@@ -81,9 +85,9 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 <div id="stage">
 <video id="v" playsinline muted></video><canvas id="cv" hidden></canvas>
 <div id="side">
-<div class="g"><span>تقريب</span><button class="sb" id="zin">＋</button><button class="sb" id="zout">－</button></div>
-<div class="g"><span>الصوت</span><button class="sb" id="vup">🔊</button><button class="sb" id="vdn">🔉</button><button class="sb" id="mut">🎙</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">＋</button><button class="sb" id="pdn">－</button></div>
+<div class="g"><span>التقريب</span><button class="sb" id="zin">قرّب ＋</button><button class="sb" id="zout">بعّد －</button></div>
+<div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button></div>
 </div>
 <div id="sheet" hidden></div>
 </div>
@@ -103,29 +107,40 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 
 <section id="data" hidden>
 <h1>بياناتي</h1>
-<p>خزّن بيانات عامة (مثل أسماء لاعبين وإحصائياتهم) لتظهرها على الفيديو أثناء التصوير.</p>
-<div id="dlist" class="col"></div>
-<div class="grow"></div>
-<button class="main" id="dadd">إضافة مجموعة</button>
+<p>ارفع ملف بيانات (Excel أو CSV أو نص أو JSON). العمود الأول = الاسم، وباقي الأعمدة = المعلومات والإحصائيات.</p>
+<div id="dstat" class="vid"></div>
+<label class="btn" for="dfile">اختيار ملف بيانات</label>
+<textarea id="dtxt" class="in" placeholder="أو اكتب/الصق البيانات هنا. كل سطر: الاسم: المعلومة"></textarea>
+<button id="dsave">حفظ النص</button>
+<button id="ddel" style="border-color:var(--red);color:var(--red)">حذف البيانات</button>
 <button id="back4">رجوع</button>
 </section>
 
-<section id="dform" hidden>
-<h1>مجموعة بيانات</h1>
-<input class="in" id="fname" placeholder="اسم المجموعة (للتعرّف عليها فقط)">
-<p style="font-size:18px">الشاشة الرئيسية (إلزامية):</p>
-<input class="in" id="fmt" placeholder="العنوان (مثل: اسم اللاعب)">
-<input class="in" id="fmx" placeholder="النص (مثل: هدفان في المباراة)">
-<p style="font-size:18px">شاشة فرعية 1 (اختيارية):</p>
-<input class="in" id="f1t" placeholder="العنوان">
-<input class="in" id="f1x" placeholder="النص">
-<p style="font-size:18px">شاشة فرعية 2 (اختيارية):</p>
-<input class="in" id="f2t" placeholder="العنوان">
-<input class="in" id="f2x" placeholder="النص">
-<div id="ferr"></div>
-<button class="main" id="fsave">حفظ</button>
-<button id="back5">رجوع</button>
+<section id="help" hidden>
+<h1>شرح الأزرار</h1>
+<div class="vid" style="font-size:19px;line-height:1.8">
+<b>شاشة اختيار الشخص</b>
+<span>• الضغط على الصورة: يجعلها هي الشخص المطلوب (إطار أخضر).</span>
+<span>• ضغط مطوّل على الصورة أو زر 🗑 حذف: يحذفها.</span>
+<span>• إضافة صور من المعرض: تضيف صور وجه الشخص.</span>
+<span>• إضافة ملف بيانات: تحمّل ملف أسماء وإحصائيات لتظهر على الفيديو.</span>
+<span>• الحساسية: دقيقة (أقل أخطاء) أو واسعة (تتعرف من زوايا ومسافات أبعد).</span>
+<b>شاشة الكاميرا</b>
+<span>• رجوع: يوقف التصوير ويحفظ ما صُوّر.</span>
+<span>• قلب الكاميرا: أمامية أو خلفية بدون قطع الفيديو.</span>
+<span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
+<span>• أعلى / أخفض: يرفع أو يخفض صوت المايك. كتم: يوقف الصوت.</span>
+<span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
+<span>• كبّر / صغّر (حجمك): يكبّر أو يصغّر الشخص داخل الخلفية. وتحرّكه بإصبعك.</span>
+<span>• بدون خلفية: يرجع للخلفية الأصلية.</span>
+<span>• عرض البيانات: يفتح قائمة بياناتك لتظهر على الفيديو. اضغطه مرة أخرى لإخفائها.</span>
+<span>• إنهاء التصوير: يجمع كل المقاطع في فيديو واحد.</span>
+</div>
+<button id="back6">رجوع</button>
 </section>
+
+<input id="dfile" type="file" hidden>
+<div id="toast" hidden></div>
 
 <video id="bgv" loop muted playsinline style="position:absolute;width:2px;height:2px;opacity:0;pointer-events:none"></video>
 <input id="bgf" type="file" accept="image/*,video/*" hidden>
@@ -140,22 +155,21 @@ const GRACE=1500; // مهلة قبل الإيقاف (مللي ثانية)
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let people=[],sel=new Set(),base=0,sets=[];
+let people=[],sel=new Set(),base=0,dataset=null,LAY=1,c1=1,c2=2;
 let actx,dest,gn,msrc,vol=1,muted=false;
-let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home',editId=null;
+let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),oc=document.createElement('canvas'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
 
 try{const s=JSON.parse(localStorage.getItem('people2')||'null');if(s){people=s.p||[];sel=new Set(s.s||[])}
  else{const o=JSON.parse(localStorage.getItem('person')||'null');if(o)o.t.forEach((t,i)=>{const id='old'+i;people.push({id,t,d:o.d[i]})})}}catch(e){}
-try{sets=JSON.parse(localStorage.getItem('sets1')||'[]')}catch(e){sets=[]}
+try{dataset=JSON.parse(localStorage.getItem('dataset1')||'null')}catch(e){dataset=null}
 function persist(){try{localStorage.setItem('people2',JSON.stringify({p:people,s:[...sel]}))}catch(e){}}
-function saveSets(){try{localStorage.setItem('sets1',JSON.stringify(sets))}catch(e){}}
 
 /* ---------- التنقل (الرجوع خطوة خطوة) ---------- */
-const PREV={person:'home',cam:'person',vids:'home',data:'home',dform:'data'};
+const PREV={person:'home',cam:'person',vids:'home',data:'home',help:'home'};
 function show(id,noPush){
  curS=id;document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);
- if(id==='person')drawFaces();if(id==='vids')drawVids();if(id==='data')drawSets();
+ if(id==='person'){drawFaces();updData()}if(id==='vids')drawVids();if(id==='data')drawData();
  if(!noPush)history.pushState({s:id},'');
 }
 async function goBack(){
@@ -167,10 +181,11 @@ async function goBack(){
 }
 window.addEventListener('popstate',()=>{if(curS!=='home')goBack()});
 history.replaceState({s:'home'},'');
-['back1','back2','back3','back4','back5'].forEach(i=>$('#'+i).onclick=()=>history.back());
+['back1','back2','back3','back4','back6'].forEach(i=>$('#'+i).onclick=()=>history.back());
 $('#goStart').onclick=()=>show('person');
 $('#goData').onclick=()=>show('data');
 $('#goVids').onclick=()=>show('vids');
+$('#goHelp').onclick=()=>show('help');
 function note(t){$('#bgm').textContent=t||''}
 function flash(t){note(t);clearTimeout(zt);zt=setTimeout(()=>note(''),1800)}
 
@@ -229,7 +244,7 @@ async function mic(){
   if(msrc)try{msrc.disconnect()}catch(e){}
   msrc=actx.createMediaStreamSource(a);msrc.connect(gn);gn.gain.value=muted?0:vol;actx.resume()}catch(e){}
 }
-function applyVol(){if(gn)gn.gain.value=muted?0:vol;$('#mut').textContent=muted?'🔇':'🎙';flash('الصوت '+(muted?'مكتوم':Math.round(vol*100)+'%'))}
+function applyVol(){if(gn)gn.gain.value=muted?0:vol;$('#mut').textContent=muted?'تشغيل':'كتم';flash('الصوت '+(muted?'مكتوم':Math.round(vol*100)+'%'))}
 $('#vup').onclick=()=>{muted=false;vol=Math.min(3,vol+.25);applyVol()};
 $('#vdn').onclick=()=>{vol=Math.max(0,vol-.25);applyVol()};
 $('#mut').onclick=()=>{muted=!muted;applyVol()};
@@ -409,41 +424,101 @@ function renderOvl(s){
  else if(subs.length>=2){const w2=(mw-gap)/2;panel(o,mx,y,w2,sh,subs[0].t,subs[0].x,u);panel(o,mx+w2+gap,y,w2,sh,subs[1].t,subs[1].x,u)}
 }
 async function showOvl(s){try{await document.fonts.load('700 30px Cairo')}catch(e){}renderOvl(s);ovl=s;$('#dat').textContent='إخفاء البيانات';updPrev()}
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3500)}
+function saveData(){try{localStorage.setItem('dataset1',JSON.stringify(dataset))}catch(e){}}
+function updData(){$('#pdata').textContent=dataset?'ملف البيانات: '+dataset.name+' ('+dataset.rows.length+' صف)':'ملف البيانات: لم يُضف (اختياري)'}
+function splitCSV(l,d){const o=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(q){if(ch==='"'){if(l[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===d){o.push(c.trim());c=''}else c+=ch}o.push(c.trim());return o}
+function table(rows){
+ rows=rows.map(r=>r.map(x=>String(x==null?'':x).trim())).filter(r=>r.some(x=>x));
+ if(!rows.length)return{cols:['الاسم'],rows:[]};
+ if(rows.length===1)return{cols:['الاسم'],rows:rows.map(r=>[r[0]])};
+ const cols=rows[0].map((c,i)=>c||'عمود '+(i+1));
+ return{cols,rows:rows.slice(1).map(r=>cols.map((_,i)=>r[i]||''))};
+}
+function fromJSON(j){
+ if(Array.isArray(j)){
+  if(j.length&&Array.isArray(j[0]))return table(j);
+  if(j.length&&typeof j[0]==='object'){const cols=[...new Set(j.flatMap(o=>Object.keys(o)))];return{cols,rows:j.map(o=>cols.map(k=>o[k]==null?'':String(o[k])))}}
+  return{cols:['الاسم'],rows:j.map(x=>[String(x)])};
+ }
+ const ks=Object.keys(j);
+ if(ks.length&&ks.every(k=>j[k]&&typeof j[k]==='object'&&!Array.isArray(j[k]))){const sc=[...new Set(ks.flatMap(k=>Object.keys(j[k])))];return{cols:['الاسم',...sc],rows:ks.map(k=>[k,...sc.map(c=>j[k][c]==null?'':String(j[k][c]))])}}
+ return{cols:['الاسم','المعلومة'],rows:ks.map(k=>[k,String(j[k])])};
+}
+function parseText(t){
+ t=t.replace(/^\uFEFF/,'').trim();
+ if(/^[\[{]/.test(t)){try{return fromJSON(JSON.parse(t))}catch(e){}}
+ const lines=t.split(/\r?\n/).filter(l=>l.trim()),first=lines[0]||'',cnt=c=>first.split(c).length-1;
+ const d=[',',';','\t','|'].sort((a,b)=>cnt(b)-cnt(a))[0];
+ if(cnt(d)>0)return table(lines.map(l=>splitCSV(l,d)));
+ const rows=lines.map(l=>{const i=l.search(/[:：]/);return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:[l.trim(),'']});
+ const two=rows.some(r=>r[1]);
+ return{cols:two?['الاسم','المعلومة']:['الاسم'],rows:rows.map(r=>two?r:[r[0]])};
+}
+async function loadXLSX(){if(window.XLSX)return;await new Promise((res,rej)=>{const t=document.createElement('script');t.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';t.onload=res;t.onerror=rej;document.head.appendChild(t)})}
+function setData(ds,name){dataset={name,cols:ds.cols,rows:ds.rows};LAY=1;c1=1;c2=2;saveData();updData();if(curS==='data')drawData()}
+async function importFile(f){ // يرجع نص الخطأ أو null عند النجاح
+ try{
+  const ext=(f.name.split('.').pop()||'').toLowerCase();let ds;
+  if(ext==='xlsx'||ext==='xls'){
+   await loadXLSX();const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+   ds=table(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));
+  }else{
+   const t=await f.text();
+   if(/[\u0000-\u0008]/.test(t.slice(0,300)))return 'هذا النوع من الملفات غير مدعوم. استخدم Excel أو CSV أو نص أو JSON.';
+   ds=parseText(t);
+  }
+  if(!ds.rows.length)return 'لم أجد بيانات داخل الملف.';
+  setData(ds,f.name);return null;
+ }catch(e){return 'تعذّر قراءة الملف. تأكد أنه Excel أو CSV أو نص أو JSON.'}
+}
+$('#dfile').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ const err=await importFile(f);toast(err||'تم تحميل: '+dataset.name+' ('+dataset.rows.length+' صف)');
+ if(!err&&curS==='cam')openSheet();
+};
+function drawData(){
+ const d=$('#dstat');d.innerHTML='';
+ const add=(t,b)=>{const e=document.createElement(b?'b':'span');e.textContent=t;d.appendChild(e)};
+ if(!dataset){add('لا توجد بيانات بعد.',1);return}
+ add(dataset.name+' — '+dataset.rows.length+' صف',1);add('الأعمدة: '+dataset.cols.join('، '));
+ dataset.rows.slice(0,3).forEach(r=>add('• '+r.join(' | ')));
+}
+$('#dsave').onclick=()=>{
+ const t=$('#dtxt').value;if(!t.trim()){toast('اكتب أو الصق البيانات أولاً');return}
+ const ds=parseText(t);if(!ds.rows.length){toast('لم أجد بيانات في النص');return}
+ setData(ds,'نص مكتوب');$('#dtxt').value='';toast('تم الحفظ');
+};
+$('#ddel').onclick=()=>{if(!dataset||!confirm('حذف البيانات المحفوظة؟'))return;dataset=null;try{localStorage.removeItem('dataset1')}catch(e){}updData();drawData()};
+
+async function showRow(r){
+ const set={main:{t:r[0],x:''},subs:[]};
+ if(LAY>=2)set.subs.push({t:dataset.cols[c1],x:r[c1]||''});
+ if(LAY===3)set.subs.push({t:dataset.cols[c2],x:r[c2]||''});
+ $('#sheet').hidden=true;await showOvl(set);
+}
 function openSheet(){
- const sh=$('#sheet');sh.innerHTML='';
- if(!sets.length){flash('لا توجد بيانات. أضفها من "بياناتي" في الشاشة الرئيسية.');return}
- sets.forEach(s=>{const b=document.createElement('button');b.textContent=s.name;b.onclick=async()=>{sh.hidden=true;await showOvl(s)};sh.appendChild(b)});
- const c=document.createElement('button');c.textContent='إغلاق';c.onclick=()=>sh.hidden=true;sh.appendChild(c);sh.hidden=false;
+ const sh=$('#sheet');sh.innerHTML='';sh.hidden=false;
+ const btn=(txt,fn,cls)=>{const b=document.createElement('button');b.textContent=txt;b.onclick=fn;if(cls)b.className=cls;return b};
+ const close=()=>{sh.hidden=true};
+ if(!dataset){
+  const p=document.createElement('p');p.style.color='#fff';p.textContent='لا توجد بيانات بعد. أضف ملف بيانات (Excel أو CSV أو نص أو JSON).';sh.appendChild(p);
+  sh.appendChild(btn('إضافة ملف بيانات',()=>$('#dfile').click(),'main'));sh.appendChild(btn('إغلاق',close));return;
+ }
+ const nc=dataset.cols.length;if(nc<2)LAY=1;else if(nc<3&&LAY>2)LAY=2;
+ if(c1>=nc)c1=1;if(c2>=nc)c2=Math.min(2,nc-1);
+ const bar=document.createElement('div');bar.className='bar';
+ [['شاشة واحدة',1],['شاشتان',2],['ثلاث شاشات',3]].forEach(([t,n])=>{const b=btn(t,()=>{LAY=n;openSheet()},LAY===n?'main':'');b.style.fontSize='17px';b.disabled=nc<n;bar.appendChild(b)});
+ sh.appendChild(bar);
+ if(LAY>=2)sh.appendChild(btn('الشاشة الفرعية 1: '+dataset.cols[c1]+' (اضغط للتغيير)',()=>{c1=c1%(nc-1)+1;openSheet()}));
+ if(LAY===3)sh.appendChild(btn('الشاشة الفرعية 2: '+dataset.cols[c2]+' (اضغط للتغيير)',()=>{c2=c2%(nc-1)+1;openSheet()}));
+ const q=document.createElement('input');q.className='in';q.placeholder='بحث بالاسم';sh.appendChild(q);
+ const list=document.createElement('div');list.className='col';sh.appendChild(list);
+ const fill=()=>{list.innerHTML='';dataset.rows.filter(r=>!q.value||r[0].includes(q.value)).slice(0,100).forEach(r=>list.appendChild(btn(r[0],()=>showRow(r))))};
+ q.oninput=fill;fill();
+ const bt=document.createElement('div');bt.className='bar';bt.appendChild(btn('ملف جديد',()=>$('#dfile').click()));bt.appendChild(btn('إغلاق',close));sh.appendChild(bt);
 }
 $('#dat').onclick=()=>{if(ovl){ovl=null;$('#dat').textContent='عرض البيانات';updPrev()}else openSheet()};
-function drawSets(){
- const l=$('#dlist');l.innerHTML='';
- if(!sets.length)l.innerHTML='<p>لا توجد بيانات بعد. اضغط "إضافة مجموعة".</p>';
- sets.forEach(s=>{
-  const d=document.createElement('div');d.className='vid';
-  const n=(s.subs||[]).filter(x=>x.t||x.x).length;
-  d.innerHTML='<b></b><span></span><div class="bar"><button class="e">تعديل</button><button class="x" style="border-color:var(--red);color:var(--red)">حذف</button></div>';
-  d.querySelector('b').textContent=s.name;
-  d.querySelector('span').textContent=s.main.t+(s.main.x?' — '+s.main.x:'')+(n?' (+'+n+' فرعية)':'');
-  d.querySelector('.e').onclick=()=>openForm(s);
-  d.querySelector('.x').onclick=()=>{if(confirm('حذف هذه المجموعة؟')){sets=sets.filter(z=>z.id!==s.id);saveSets();drawSets()}};
-  l.appendChild(d);
- });
-}
-function openForm(s){
- editId=s?s.id:null;const sb=(s&&s.subs)||[];
- $('#fname').value=s?s.name:'';$('#fmt').value=s?s.main.t:'';$('#fmx').value=s?s.main.x:'';
- $('#f1t').value=sb[0]?sb[0].t:'';$('#f1x').value=sb[0]?sb[0].x:'';$('#f2t').value=sb[1]?sb[1].t:'';$('#f2x').value=sb[1]?sb[1].x:'';
- $('#ferr').textContent='';show('dform');
-}
-$('#dadd').onclick=()=>openForm(null);
-$('#fsave').onclick=()=>{
- const name=$('#fname').value.trim(),mt=$('#fmt').value.trim();
- if(!name||!mt){$('#ferr').textContent='اكتب اسم المجموعة والعنوان الرئيسي على الأقل.';return}
- const v=i=>$('#'+i).value.trim();
- const o={id:editId||String(Date.now()),name,main:{t:mt,x:v('fmx')},subs:[{t:v('f1t'),x:v('f1x')},{t:v('f2t'),x:v('f2x')}]};
- sets=editId?sets.map(z=>z.id===editId?o:z):[...sets,o];saveSets();history.back();
-};
 
 /* ---------- الإنهاء وقائمة الفيديوهات ---------- */
 function finish(){
