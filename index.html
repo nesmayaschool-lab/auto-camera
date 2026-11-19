@@ -32,11 +32,20 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 .card .ck{display:none;font-size:18px;font-weight:700;color:var(--teal)}
 .card.sel .ck{display:block}
 .card .del{width:100%;min-height:54px;border-radius:12px;border:0;background:var(--red);color:#fff;font-size:20px;padding:0}
+.pchips{display:flex;flex-wrap:wrap;gap:8px}
+.pchips button{flex:1 1 44%;min-height:56px;font-size:19px}
+.card .ang{font-size:16px;color:var(--mute)}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .vid{background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .vid video{width:100%;border-radius:10px;background:#000}
 .vid b{font-size:22px}
-#cam{background:#111;color:#fff;gap:10px}
+#cam{background:#111;color:#fff;position:relative;height:100vh;height:100dvh;min-height:0;padding:0;gap:0;overflow:hidden}
+.camtop{position:absolute;top:0;left:0;right:0;z-index:5;padding:max(10px,env(safe-area-inset-top)) 10px 18px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
+.cambot{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:34px 10px max(10px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.78));display:flex;flex-direction:column;gap:8px}
+#cam .pill{font-size:16px;padding:6px 12px;flex:1;min-width:0}
+#stt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#cam.nui .cambot,#cam.nui #side,#cam.nui .camtop .pill,#cam.nui #tm,#cam.nui #back3{display:none}
+#cam.nui .camtop .bar{justify-content:flex-end}
 #cam button{min-height:56px;font-size:20px;border-color:#fff;color:#fff}
 #cam button.stop{border-color:var(--red)}
 #cam p{color:#D6D3CE;text-align:center;font-size:16px;min-height:22px}
@@ -44,16 +53,16 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 .dot{width:16px;height:16px;border-radius:8px;background:#888;flex:none}
 .on .dot{background:#FF5252}
 #tm{font-size:26px}
-#stage{position:relative;flex:1;min-height:0;border-radius:18px;overflow:hidden;background:#000;touch-action:none}
-#stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#stage{position:absolute;inset:0;border-radius:0;overflow:hidden;background:#000;touch-action:none}
+#stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #stage video{opacity:0}
-#side{position:absolute;right:6px;top:50%;transform:translateY(-50%);max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
+#side{position:absolute;right:6px;top:84px;z-index:6;max-height:calc(100% - 470px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
 #side .g{display:flex;flex-direction:column;align-items:center;gap:6px}
 #side span{font-size:17px;font-weight:700;color:#FDE68A}
 #cam .sb{width:104px;height:54px;min-height:54px;border-radius:14px;padding:0 4px;font-size:20px;background:rgba(0,0,0,.72);border-width:2px}
 textarea.in{min-height:110px;resize:vertical}
 #toast{position:fixed;left:14px;right:14px;bottom:90px;background:#222;color:#fff;padding:14px;border-radius:14px;font-size:20px;text-align:center;z-index:50}
-#sheet{position:absolute;left:8px;right:8px;bottom:8px;max-height:75%;overflow-y:auto;background:rgba(10,22,48,.96);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
+#sheet{position:fixed;left:8px;right:8px;top:70px;bottom:8px;z-index:20;overflow-y:auto;background:rgba(10,22,48,.96);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
 <body>
@@ -61,21 +70,22 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 18</p>
+<p style="text-align:center;font-size:15px">الإصدار 19</p>
 </section>
 
 <section id="person" hidden>
 <h1>اختر الشخص</h1>
-<p>اضغط على الصورة لاختيارها. اضغط مطولاً عليها أو اضغط 🗑 لحذفها.</p>
+<p>اضغط على الصورة لاستخدامها أو إيقافها (الإطار الأخضر = مستخدمة). اضغط مطولاً أو 🗑 للحذف. أضف صوراً من زوايا مختلفة لنفس الشخص ليتعرف عليه من أي جهة.</p>
 <div class="grow col center"><div id="faces"></div></div>
 <div id="msg"></div>
 <div class="col">
-<label class="btn" for="file">إضافة صور من المعرض</label>
+<p style="font-size:19px;text-align:center;color:var(--ink)">إضافة صورة حسب زاوية الوجه:</p>
+<div class="pchips" id="angs"></div>
 <label class="btn" for="dfile">إضافة ملف بيانات (اختياري)</label>
 <p id="pdata" style="font-size:18px;text-align:center"></p>
 <input id="file" type="file" accept="image/*" multiple hidden>
 <button id="lv">الحساسية: متوسطة</button>
-<button id="gr">مهلة الإيقاف: ثانية ونصف</button>
+<button id="gr">مهلة الإيقاف: فوري</button>
 <button class="main" id="next" disabled>حفظ والمتابعة</button>
 <button id="clr" style="border-color:var(--red);color:var(--red)">حذف كل الصور</button>
 <button id="back1">رجوع</button>
@@ -83,7 +93,7 @@ textarea.in{min-height:110px;resize:vertical}
 </section>
 
 <section id="cam" hidden>
-<div class="bar"><button id="back3" style="width:120px;min-height:50px">رجوع</button><div class="pill" id="st"><span class="dot"></span><span id="stt">بانتظار الشخص</span></div><b id="tm">00:00</b></div>
+<div class="camtop"><div class="bar"><button id="back3" style="width:100px;min-height:50px;font-size:18px">رجوع</button><div class="pill" id="st"><span class="dot"></span><span id="stt">بانتظار الشخص</span></div><b id="tm">00:00</b><button id="hide" style="width:auto;min-width:96px;min-height:50px;font-size:17px;padding:0 10px">إخفاء</button></div></div>
 <div id="stage">
 <video id="v" playsinline muted></video><canvas id="cv" hidden></canvas>
 <div id="side">
@@ -94,11 +104,13 @@ textarea.in{min-height:110px;resize:vertical}
 </div>
 <div id="sheet" hidden></div>
 </div>
+<div class="cambot">
 <p id="bgm"></p>
 <div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="fill" style="flex:1 1 30%">ملء الشاشة: لا</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
 <button id="dat">عرض البيانات</button>
 <button class="stop" id="end">إنهاء التصوير</button>
 <p id="dbg" style="font-size:12px;color:#9ca3af;min-height:14px"></p>
+</div>
 </section>
 
 <section id="vids" hidden>
@@ -124,9 +136,10 @@ textarea.in{min-height:110px;resize:vertical}
 <h1>شرح الأزرار</h1>
 <div class="vid" style="font-size:19px;line-height:1.8">
 <b>شاشة اختيار الشخص</b>
-<span>• الضغط على الصورة: يجعلها هي الشخص المطلوب (إطار أخضر).</span>
+<span>• الضغط على الصورة: يستخدمها أو يوقفها (إطار أخضر = مستخدمة).</span>
 <span>• ضغط مطوّل على الصورة أو زر 🗑 حذف: يحذفها.</span>
-<span>• إضافة صور من المعرض: تضيف صور وجه الشخص.</span>
+<span>• أزرار الزوايا (من الأمام، الجانب، من الأعلى...): تضيف صورة للوجه من تلك الزاوية.</span>
+<span>• إخفاء (أعلى الكاميرا): يخفي كل الأزرار لترى الكاميرا كاملة، ثم «إظهار الأزرار».</span>
 <span>• إضافة ملف بيانات: تحمّل ملف أسماء وإحصائيات لتظهر على الفيديو.</span>
 <span>• مهلة الإيقاف: كم تنتظر الكاميرا قبل أن تتوقف بعد اختفاء الشخص.</span>
 <span>• الحساسية: دقيقة (أقل أخطاء) أو واسعة (تتعرف من زوايا ومسافات أبعد).</span>
@@ -158,12 +171,12 @@ const $=s=>document.querySelector(s);
 const MP='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
 // th = تطابق مباشر | loose = تطابق متساهل أثناء تتبع الشخص بعد التعرّف عليه
 const LV=[{n:'دقيقة',th:.5,loose:.65},{n:'متوسطة',th:.6,loose:.8},{n:'واسعة',th:.68,loose:.92}];
-const GR=[500,1500,3000],GRL=['نصف ثانية','ثانية ونصف','3 ثوانٍ'];
-let gri=+(localStorage.getItem('gr')||1);if(!(gri>=0&&gri<3))gri=1;
+const GR=[250,700,1500,3000],GRL=['فوري','قصيرة','ثانية ونصف','3 ثوانٍ'];
+let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FILL=localStorage.getItem('fill')==='1',people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FILL=localStorage.getItem('fill')!=='0',people=[],sel=new Set(),base=0,dataset=null,ROT=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
@@ -205,12 +218,12 @@ function drawFaces(){
  if(!people.length)f.innerHTML='<div class="ph">لا توجد صورة</div>';
  people.forEach(p=>{
   const c=document.createElement('div');c.className='card'+(sel.has(p.id)?' sel':'');
-  c.innerHTML='<img src="'+p.t+'" draggable="false"><span class="ck">✓ المختارة</span><button class="del">🗑 حذف</button>';
+  c.innerHTML='<img src="'+p.t+'" draggable="false"><span class="ang"></span><span class="ck">✓ مستخدمة</span><button class="del">🗑 حذف</button>';c.querySelector('.ang').textContent=p.a||'';
   const im=c.querySelector('img');let tm,long=false;
   const del=()=>{people=people.filter(x=>x.id!==p.id);sel.delete(p.id);persist();drawFaces()};
   im.onpointerdown=()=>{long=false;tm=setTimeout(()=>{long=true;if(confirm('حذف هذه الصورة؟'))del()},600)};
   im.onpointerup=im.onpointerleave=im.onpointercancel=()=>clearTimeout(tm);
-  im.onclick=()=>{if(long){long=false;return}sel=new Set([p.id]);persist();drawFaces()}; // الضغط = هذه هي الصورة المختارة
+  im.onclick=()=>{if(long){long=false;return}sel.has(p.id)?sel.delete(p.id):sel.add(p.id);persist();drawFaces()}; // الضغط = هذه هي الصورة المختارة
   im.oncontextmenu=e=>e.preventDefault();
   c.querySelector('.del').onclick=del;
   f.appendChild(c);
@@ -220,7 +233,7 @@ function drawFaces(){
 $('#clr').onclick=()=>{if(!people.length||!confirm('حذف كل الصور المحفوظة؟'))return;people=[];sel.clear();persist();try{localStorage.removeItem('person')}catch(e){}drawFaces()};
 $('#lv').textContent='الحساسية: '+LV[lv].n;
 $('#gr').textContent='مهلة الإيقاف: '+GRL[gri];
-$('#gr').onclick=()=>{gri=(gri+1)%3;localStorage.setItem('gr',gri);$('#gr').textContent='مهلة الإيقاف: '+GRL[gri]};
+$('#gr').onclick=()=>{gri=(gri+1)%GR.length;localStorage.setItem('gr2',gri);$('#gr').textContent='مهلة الإيقاف: '+GRL[gri]};
 $('#lv').onclick=()=>{lv=(lv+1)%3;localStorage.setItem('lv',lv);$('#lv').textContent='الحساسية: '+LV[lv].n};
 async function shrink(f){ // تصغير الصورة قبل التحليل لتسريعه
  let src;try{src=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){src=await faceapi.bufferToImage(f)}
@@ -232,6 +245,8 @@ const opts=(n,s)=>new faceapi.TinyFaceDetectorOptions({inputSize:n,scoreThreshol
 async function loadModels(){if(ready)return;if(!window.faceapi)throw new Error('لم يتم تحميل مكتبة الوجوه. تأكد من الإنترنت.');
  await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MP),faceapi.nets.faceLandmark68TinyNet.loadFromUri(MP),faceapi.nets.faceRecognitionNet.loadFromUri(MP)]);ready=true}
 
+const ANGS=['من الأمام','الجانب الأيمن','الجانب الأيسر','من الأعلى','من الأسفل','مائلة قليلاً'];let angle=ANGS[0];
+ANGS.forEach(a=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>{angle=a;$('#file').click()};$('#angs').appendChild(b)});
 $('#file').onchange=async e=>{
  const files=[...e.target.files];if(!files.length)return;
  msg('جاري تجهيز أداة التعرف على الوجه (أول مرة تأخذ وقتاً)...');$('#next').disabled=true;
@@ -246,10 +261,10 @@ $('#file').onchange=async e=>{
   const sz=Math.max(b.width,b.height)*1.2;
   c.getContext('2d').drawImage(img,b.x+b.width/2-sz/2,b.y+b.height/2-sz/2,sz,sz,0,0,96,96);
   const id=Date.now()+'-'+Math.random().toString(36).slice(2,6);
-  people.push({id,t:c.toDataURL('image/jpeg',.8),d:Array.from(d.descriptor)});ids.push(id);
+  people.push({id,t:c.toDataURL('image/jpeg',.8),d:Array.from(d.descriptor),a:angle});ids.push(id);
  }
  e.target.value='';
- if(ids.length)sel=new Set(ids); // الصور الجديدة (لنفس الشخص) هي المختارة
+ ids.forEach(i=>sel.add(i)); // الصور الجديدة تُستخدم مباشرة
  persist();drawFaces();
  msg(bad?`لم أجد وجهاً واضحاً في ${bad} صورة. جرّب صورة أوضح.`:'');
 };
@@ -282,7 +297,7 @@ async function startCam(){
  zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
 }
 $('#flip').onclick=async()=>{
- if(!running)return;const prev=facing;facing=facing==='user'?'environment':'user';flash('جاري قلب الكاميرا...');gen++;lastSeen=Date.now()+1500;
+ if(!running)return;const prev=facing;facing=facing==='user'?'environment':'user';flash('جاري قلب الكاميرا...');gen++;lastSeen=0;if(rec&&rec.state==='recording'){rec.pause();setStatus(false)}
  try{await startCam()}catch(e){facing=prev;try{await startCam()}catch(e2){}flash('تعذّر فتح الكاميرا الأخرى')}
  await new Promise(r=>setTimeout(r,300));
  if(!astream||astream.getAudioTracks().some(t=>t.readyState!=='live'))await mic();
@@ -311,6 +326,7 @@ $('#rot').onclick=()=>{ROT=(ROT+90)%360;rebuild();calibrated=true;lastBox=null;l
 $('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');
 $('#fill').onclick=()=>{FILL=!FILL;try{localStorage.setItem('fill',FILL?'1':'0')}catch(e){}$('#fill').textContent='ملء الشاشة: '+(FILL?'نعم':'لا');rebuild()};
 $('#rot2').onclick=()=>$('#rot').onclick();
+$('#hide').onclick=()=>{const c=$('#cam');c.classList.toggle('nui');$('#hide').textContent=c.classList.contains('nui')?'إظهار الأزرار':'إخفاء'};
 $('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
@@ -336,7 +352,7 @@ function paint(t){
  if(t-lastPaint<33)return;lastPaint=t;
  const v=$('#v');if(!v.videoWidth)return;
  if(!cvs.width){const q=ROT%180===0,fw=q?v.videoWidth:v.videoHeight,fh=q?v.videoHeight:v.videoWidth,k=Math.min(1,1080/Math.max(fw,fh));
-  if(FILL){cvs.width=por()?608:1080;cvs.height=por()?1080:608}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
+  if(FILL){const L=1200,a=Math.max(.4,Math.min(.8,Math.min(innerWidth,innerHeight)/Math.max(innerWidth,innerHeight))),m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
  else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height);drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
 }
