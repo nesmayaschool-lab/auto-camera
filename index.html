@@ -74,7 +74,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 22</p>
+<p style="text-align:center;font-size:15px">الإصدار 23</p>
 </section>
 
 <section id="person" hidden>
@@ -149,8 +149,8 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• رجوع: يوقف التصوير ويحفظ ما صُوّر.</span>
 <span>• قلب الكاميرا: أمامية أو خلفية بدون قطع الفيديو.</span>
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
-<span>• حجم الصورة: «كامل المشهد» بدون تكبير، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
-<span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس الصورة.</span>
+<span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
+<span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
 <span>• ميل ↺ ↻: يعدّل ميل الصورة درجتين في كل ضغطة (يُحفظ لكل كاميرا).</span>
 <span>• الواجهة (أعلى الكاميرا): «شاشة كاملة» تجعل الكاميرا بملء الشاشة والأزرار فوقها، و«عادية» تجعلها في الوسط والأزرار تحتها.</span>
 <span>• أعلى / أخفض: يرفع أو يخفض صوت المايك. كتم: يوقف الصوت.</span>
@@ -183,7 +183,7 @@ let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,er
 let FM=+(localStorage.getItem('fm')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
-const cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
+const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
 
 try{const s=JSON.parse(localStorage.getItem('people2')||'null');if(s){people=s.p||[];sel=new Set(s.s||[])}
  else{const o=JSON.parse(localStorage.getItem('person')||'null');if(o)o.t.forEach((t,i)=>{const id='old'+i;people.push({id,t,d:o.d[i]})})}}catch(e){}
@@ -311,7 +311,7 @@ $('#flip').onclick=async()=>{
 function updPrev(){cvs.hidden=!running;$('#pg').hidden=!bg}
 let calibrated=false,calN=0;
 function autoRot(){
- const v=$('#v');ROT=0;MIR=false;ROLL=+(localStorage.getItem('roll_'+facing)||0);calN=0;calibrated=false;
+ const v=$('#v');ROT=0;{const sm=localStorage.getItem('mir_'+facing);MIR=sm!==null?sm==='1':facing==='user'}ROLL=+(localStorage.getItem('roll_'+facing)||0);calN=0;calibrated=false;
  const sv=localStorage.getItem('rot2_'+facing); // اتجاه صحّحته أنت سابقاً لهذه الكاميرا
  if(sv!==null){ROT=+sv||0;calibrated=true;return}
  const h='إذا كانت الصورة جانبية: اضغط «تدوير الصورة»، أو وجّه الكاميرا نحو وجه ليُضبط تلقائياً.';note(h);setTimeout(()=>{if($('#bgm').textContent===h)note('')},9000);
@@ -336,7 +336,7 @@ const saveRoll=()=>{try{localStorage.setItem('roll_'+facing,ROLL)}catch(e){}flas
 $('#rl').onclick=()=>{ROLL=Math.max(-30,ROLL-2);saveRoll()};
 $('#rr2').onclick=()=>{ROLL=Math.min(30,ROLL+2);saveRoll()};
 applyUI();$('#ui').onclick=()=>{UIF=!UIF;try{localStorage.setItem('ui',UIF?'1':'0')}catch(e){}applyUI()};
-$('#mir').onclick=()=>{MIR=!MIR;flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
+$('#mir').onclick=()=>{MIR=!MIR;try{localStorage.setItem('mir_'+facing,MIR?'1':'0')}catch(e){}flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
  if(c&&c.zoom&&facing!=='user'){
@@ -360,10 +360,13 @@ function paint(t){
  requestAnimationFrame(paint);
  if(t-lastPaint<33)return;lastPaint=t;
  const v=$('#v');if(!v.videoWidth)return;
- if(!cvs.width){const q=ROT%180===0,fw=q?v.videoWidth:v.videoHeight,fh=q?v.videoHeight:v.videoWidth,k=Math.min(1,1080/Math.max(fw,fh));
-  if(FM>0){const L=1080,m=608;cvs.width=por()?m:L;cvs.height=por()?L:m}else{cvs.width=Math.round(fw*k/2)*2;cvs.height=Math.round(fh*k/2)*2}}
+ if(!cvs.width){const r=$('#stage').getBoundingClientRect(),a=Math.max(.4,Math.min(.8,Math.min(r.width,r.height)/Math.max(r.width,r.height)||.56)),L=1200,m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
- else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height);drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl()}
+ else{
+  if(FM<2){bsc.width=24;bsc.height=Math.max(8,Math.round(24*cvs.height/cvs.width));bsx.drawImage(v,0,0,bsc.width,bsc.height);cx.imageSmoothingEnabled=true;cx.drawImage(bsc,0,0,cvs.width,cvs.height);cx.fillStyle='rgba(0,0,0,.3)';cx.fillRect(0,0,cvs.width,cvs.height)}
+  else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height)}
+  drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl();
+ }
 }
 function startRecorder(){
  let tries=0;const w=setInterval(()=>{
@@ -451,15 +454,8 @@ function onSeg(r){
  const v=$('#v'),m=r.segmentationMask,W=cvs.width,H=cvs.height;if(!W||!v.videoWidth)return;
  if(pc.width!==W||pc.height!==H){pc.width=W;pc.height=H}
  pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,W,H);
- drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,0);
+ pcx.filter='blur(2px)';drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,0);pcx.filter='none';
  pcx.globalCompositeOperation='source-in';drawV(pcx,v,v.videoWidth,v.videoHeight,DZ,0);
- { // تلاشي ناعم عند حدود الكادر (يمين/يسار/أسفل) بدل القصّ المستقيم
-  const q=ROT%180===0,ew=q?v.videoWidth:v.videoHeight,eh=q?v.videoHeight:v.videoWidth,k=Math.min(W/ew,H/eh)*DZ,fw=ew*k,fh=eh*k,fx=(W-fw)/2,fy=(H-fh)/2,fe=fw*.1,fb=fh*.12;
-  pcx.globalCompositeOperation='destination-out';
-  let g=pcx.createLinearGradient(fx,0,fx+fe,0);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');pcx.fillStyle=g;pcx.fillRect(fx,fy,fe,fh);
-  g=pcx.createLinearGradient(fx+fw,0,fx+fw-fe,0);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');pcx.fillStyle=g;pcx.fillRect(fx+fw-fe,fy,fe,fh);
-  g=pcx.createLinearGradient(0,fy+fh,0,fy+fh-fb);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');pcx.fillStyle=g;pcx.fillRect(fx,fy+fh-fb,fw,fb);
- }
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
  const pw=W*ps,ph=H*ps;cx.drawImage(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
@@ -481,7 +477,7 @@ $('#bgf').onchange=async e=>{
   await loadSeg();const url=URL.createObjectURL(f);
   if(f.type.startsWith('video')){bgv.src=url;await bgv.play();bg=bgv;bgType='video'}
   else{const im=new Image();im.src=url;await im.decode();bg=im;bgType='img'}
-  ps=1;pxc=.5;pyc=.62;updPrev();$('#nobg').hidden=false;note('');
+  ps=1;pxc=.5;pyc=.5;updPrev();$('#nobg').hidden=false;note('');
   flash('حرّك الشخص بإصبعك، وكبّره بإصبعين أو بزر حجمك');
  }catch(er){note('تعذّر تجهيز الخلفية. تأكد من الإنترنت وجرّب مرة أخرى.')}
 };
