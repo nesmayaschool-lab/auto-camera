@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 27</p>
+<p style="text-align:center;font-size:15px">الإصدار 28</p>
 </section>
 
 <section id="person" hidden>
@@ -105,9 +105,9 @@ textarea.in{min-height:110px;resize:vertical}
 <div id="side">
 <div class="g"><span>التقريب</span><button class="sb" id="zin">قرّب ＋</button><button class="sb" id="zout">بعّد －</button></div>
 <div class="g"><span>الصورة</span><button class="sb" id="rot">تدوير ⟳</button><button class="sb" id="mir">مرآة ⇄</button><button class="sb" id="rl">ميل ↺</button><button class="sb" id="rr2">ميل ↻</button></div>
-<div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button></div>
+<div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button><button class="sb" id="sy">لفّ رأسي ↻</button><button class="sb" id="sx">لفّ أفقي ⟳</button><button class="sb" id="ss">سرعة: وسط</button></div>
 <div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
 </div>
 </div>
 <div id="sheet" hidden></div>
@@ -155,6 +155,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
 <span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
+<span>• لفّ رأسي / لفّ أفقي: يدير صورتك دورة كاملة باستمرار على الخلفية الجديدة (اضغطه مرة أخرى للإيقاف)، وسرعة: تغيّر سرعة الدوران. حرّك الشخص بإصبعك لتختار مكانه.</span>
 <span>• ثلاثي الأبعاد (دوران ↶ ↷ وميل ⤒ ⤓): يدير صورتك كأنها لوحة في الفضاء بمنظور ثلاثي الأبعاد، و«عادي» يعيدها.</span>
 <span>• ميل ↺ ↻: يعدّل ميل الصورة درجتين في كل ضغطة (يُحفظ لكل كاميرا).</span>
 <span>• الواجهة (أعلى الكاميرا): «شاشة كاملة» تجعل الكاميرا بملء الشاشة والأزرار فوقها، و«عادية» تجعلها في الوسط والأزرار تحتها.</span>
@@ -162,6 +163,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
 <span>• إزالة: لطيفة / متوسطة / قوية. إذا بقيت أجزاء من خلفيتك القديمة اجعلها «قوية»، وإذا اختفت أطراف من جسمك اجعلها «لطيفة».</span>
 <span>• كبّر / صغّر (حجمك): يكبّر أو يصغّر الشخص داخل الخلفية. وتحرّكه بإصبعك.</span>
+<span>• حذف لون: اضغطه ثم اضغط على الشاشة فوق أي شيء من خلفيتك القديمة ظهر بالخطأ (مثل الأحمر)، فيُحذف لونه. مسح الألوان: يلغي ذلك.</span>
 <span>• بدون خلفية: يرجع للخلفية الأصلية.</span>
 <span>• عرض البيانات: يفتح قائمة بياناتك لتظهر على الفيديو. اضغطه مرة أخرى لإخفائها.</span>
 <span>• إنهاء التصوير: يجمع كل المقاطع في فيديو واحد.</span>
@@ -187,10 +189,10 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,lastSpin=0,rmCols=[],pickMode=false,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
-const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
+const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),mk=document.createElement('canvas'),mkx=mk.getContext('2d',{willReadFrequently:true}),ik=document.createElement('canvas'),ikx=ik.getContext('2d',{willReadFrequently:true}),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
 
 try{const s=JSON.parse(localStorage.getItem('people2')||'null');if(s){people=s.p||[];sel=new Set(s.s||[])}
  else{const o=JSON.parse(localStorage.getItem('person')||'null');if(o)o.t.forEach((t,i)=>{const id='old'+i;people.push({id,t,d:o.d[i]})})}}catch(e){}
@@ -349,7 +351,11 @@ $('#y1').onclick=()=>{Y3=Math.max(-70,Y3-10);flash('دوران '+Y3+'°')};
 $('#y2').onclick=()=>{Y3=Math.min(70,Y3+10);flash('دوران '+Y3+'°')};
 $('#p1').onclick=()=>{P3=Math.max(-70,P3-10);flash('ميل '+P3+'°')};
 $('#p2').onclick=()=>{P3=Math.min(70,P3+10);flash('ميل '+P3+'°')};
-$('#r3').onclick=()=>{Y3=0;P3=0;flash('الوضع العادي')};
+$('#r3').onclick=()=>{Y3=0;P3=0;SPIN='';flash('الوضع العادي')};
+const SPDS=[['بطيء',60],['وسط',120],['سريع',240]];let spi=1;
+$('#sy').onclick=()=>{SPIN=SPIN==='y'?'':'y';if(SPIN)P3=0;flash(SPIN?'دوران رأسي مستمر':'تم إيقاف الدوران')};
+$('#sx').onclick=()=>{SPIN=SPIN==='x'?'':'x';if(SPIN)Y3=0;flash(SPIN?'دوران أفقي مستمر':'تم إيقاف الدوران')};
+$('#ss').onclick=()=>{spi=(spi+1)%3;SPD=SPDS[spi][1];$('#ss').textContent='سرعة: '+SPDS[spi][0];flash('سرعة الدوران: '+SPDS[spi][0])};
 $('#mir').onclick=()=>{MIR=!MIR;try{localStorage.setItem('mir_'+facing,MIR?'1':'0')}catch(e){}flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
@@ -372,7 +378,7 @@ function drawV(ctx,src,sw,sh,z,fm){
 function paint(t){
  if(!drawOn)return;
  requestAnimationFrame(paint);
- if(t-lastPaint<33)return;lastPaint=t;
+ if(t-lastPaint<33)return;lastPaint=t;spinTick(t);
  const v=$('#v');if(!v.videoWidth)return;
  if(!cvs.width){const r=$('#stage').getBoundingClientRect(),a=Math.max(.4,Math.min(.8,Math.min(r.width,r.height)/Math.max(r.width,r.height)||.56)),L=1200,m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
@@ -465,29 +471,48 @@ async function look(g){
 }
 
 /* ---------- تبديل الخلفية + تحريك الشخص داخلها ---------- */
-function render3D(src,dx,dy,dw,dh){ // يرسم الصورة داخل المستطيل بمنظور ثلاثي الأبعاد (دوران ومَيَلان)
+function render3D(src,dx,dy,dw,dh){ // منظور ثلاثي الأبعاد: دوران رأسي/أفقي حتى دورة كاملة (الظهر يظهر معكوساً كلوحة)
  if(!Y3&&!P3){cx.drawImage(src,dx,dy,dw,dh);return}
- const yw=Y3*Math.PI/180,pt=P3*Math.PI/180,D=1.7,sw=src.width,sh=src.height,N=36;let cur=src;
+ const yw=Y3*Math.PI/180,pt=P3*Math.PI/180,D=1.7,sw=src.width,sh=src.height,N=36,sg=v=>v>=0?1:-1;let cur=src;
  if(P3){
   if(t3.width!==sw||t3.height!==sh){t3.width=sw;t3.height=sh}
   t3x.clearRect(0,0,sw,sh);
   const f=y=>1/(1+y*Math.sin(pt)/D),g=y=>y*Math.cos(pt)*f(y);
-  for(let i=0;i<N;i++){const y0=i/N-.5,y1=(i+1)/N-.5,sc=f((y0+y1)/2),Y0=g(y0),Y1=g(y1);
-   t3x.drawImage(src,0,i*sh/N,sw,sh/N+1,sw/2-sw*sc/2,sh/2+Y0*sh,sw*sc,(Y1-Y0)*sh+1)}
+  for(let i=0;i<N;i++){const y0=i/N-.5,y1=(i+1)/N-.5,sc=f((y0+y1)/2),Y0=g(y0),Y1=g(y1),h2=(Y1-Y0)*sh;
+   t3x.drawImage(src,0,i*sh/N,sw,sh/N+1,sw/2-sw*sc/2,sh/2+Y0*sh,sw*sc,h2+sg(h2))}
   cur=t3;
  }
  if(Y3){
   const f=x=>1/(1+x*Math.sin(yw)/D),g=x=>x*Math.cos(yw)*f(x);
-  for(let i=0;i<N;i++){const x0=i/N-.5,x1=(i+1)/N-.5,sc=f((x0+x1)/2),X0=g(x0),X1=g(x1);
-   cx.drawImage(cur,i*sw/N,0,sw/N+1,sh,dx+dw/2+X0*dw,dy+dh/2-dh*sc/2,(X1-X0)*dw+1,dh*sc)}
+  for(let i=0;i<N;i++){const x0=i/N-.5,x1=(i+1)/N-.5,sc=f((x0+x1)/2),X0=g(x0),X1=g(x1),w2=(X1-X0)*dw;
+   cx.drawImage(cur,i*sw/N,0,sw/N+1,sh,dx+dw/2+X0*dw,dy+dh/2-dh*sc/2,w2+sg(w2),dh*sc)}
  }else cx.drawImage(cur,dx,dy,dw,dh);
+}
+function spinTick(t){
+ if(SPIN){const dt=Math.min(.1,Math.max(0,(t-lastSpin)/1000));if(SPIN==='y')Y3=(Y3+SPD*dt)%360;else P3=(P3+SPD*dt)%360}
+ lastSpin=t;
+}
+function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;
+ if(d){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360}
+ return[h,mx?d/mx:0,mx];
 }
 function onSeg(r){
  if(!drawOn||!bg)return;
  const v=$('#v'),m=r.segmentationMask,W=cvs.width,H=cvs.height;if(!W||!v.videoWidth)return;
  if(pc.width!==W||pc.height!==H){pc.width=W;pc.height=H}
  pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,W,H);
- pcx.filter='url(#mk) blur(1.5px)';drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
+ let msrc2=m;
+ if(rmCols.length){ // نحذف من الشخص كل بكسل يشبه الألوان التي اخترتها
+  const w2=160,h2=Math.max(8,Math.round(160*v.videoHeight/v.videoWidth));
+  if(mk.width!==w2||mk.height!==h2){mk.width=w2;mk.height=h2;ik.width=w2;ik.height=h2}
+  mkx.clearRect(0,0,w2,h2);mkx.drawImage(m,0,0,w2,h2);ikx.drawImage(r.image||v,0,0,w2,h2);
+  const A=mkx.getImageData(0,0,w2,h2),B=ikx.getImageData(0,0,w2,h2).data,d=A.data;
+  for(let i=0;i<d.length;i+=4){if(d[i+3]<8)continue;const c=rgb2hsv(B[i],B[i+1],B[i+2]);
+   for(const q of rmCols){const dh=Math.min(Math.abs(c[0]-q[0]),360-Math.abs(c[0]-q[0]));
+    if(dh<22&&Math.abs(c[1]-q[1])<.4&&Math.abs(c[2]-q[2])<.5&&c[1]>.2){d[i+3]=0;break}}}
+  mkx.putImageData(A,0,0);msrc2=mk;
+ }
+ pcx.filter='url(#mk) blur(1.5px)';drawV(pcx,msrc2,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
  pcx.globalCompositeOperation='source-in';drawV(pcx,r.image||v,v.videoWidth,v.videoHeight,DZ,FM);
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
@@ -520,11 +545,17 @@ const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 const MKL=['لطيفة','متوسطة','قوية'],MKT=[.4,.5,.6];let mkl=+(localStorage.getItem('mk1')||2);if(!(mkl>=0&&mkl<3))mkl=2;
 function applyMk(){$('#mkf').setAttribute('intercept',String(-10*MKT[mkl]));$('#mkb').textContent='إزالة: '+MKL[mkl]}
 applyMk();$('#mkb').onclick=()=>{mkl=(mkl+1)%3;try{localStorage.setItem('mk1',mkl)}catch(e){}applyMk();flash('قوة إزالة الخلفية: '+MKL[mkl])};
+$('#pick').onclick=()=>{pickMode=true;toast('اضغط على الشاشة فوق اللون الذي تريد حذفه (مثلاً الشيء الأحمر)')};
+$('#unpick').onclick=()=>{rmCols=[];pickMode=false;toast('تم مسح كل الألوان المحذوفة')};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 const ptrs=new Map();let pd=0;const stage=$('#stage');
 const pdist=()=>{const a=[...ptrs.values()];return a.length<2?0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
-stage.onpointerdown=e=>{if(!bg||e.target.closest('#side,#sheet'))return;try{stage.setPointerCapture(e.pointerId)}catch(x){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});pd=pdist()};
+stage.onpointerdown=e=>{if(!bg||e.target.closest('#side,#sheet'))return;
+ if(pickMode){pickMode=false;const r=stage.getBoundingClientRect(),sc=Math.min(r.width/cvs.width,r.height/cvs.height),ox=(r.width-cvs.width*sc)/2,oy=(r.height-cvs.height*sc)/2,x=Math.round((e.clientX-r.left-ox)/sc),y=Math.round((e.clientY-r.top-oy)/sc);
+  try{const d=cx.getImageData(Math.max(0,x-2),Math.max(0,y-2),5,5).data;let R=0,G=0,B=0,n=0;for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];n++}rmCols.push(rgb2hsv(R/n,G/n,B/n));toast('تم. سيُحذف هذا اللون من الخلفية القديمة.')}catch(er){toast('تعذّر اختيار اللون، حاول مرة أخرى.')}
+  return}
+try{stage.setPointerCapture(e.pointerId)}catch(x){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});pd=pdist()};
 stage.onpointermove=e=>{
  const p=ptrs.get(e.pointerId);if(!p||!cvs.width)return;
  const r=stage.getBoundingClientRect(),sc=Math.min(r.width/cvs.width,r.height/cvs.height);
