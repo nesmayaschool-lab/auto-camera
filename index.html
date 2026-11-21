@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 25</p>
+<p style="text-align:center;font-size:15px">الإصدار 27</p>
 </section>
 
 <section id="person" hidden>
@@ -105,8 +105,9 @@ textarea.in{min-height:110px;resize:vertical}
 <div id="side">
 <div class="g"><span>التقريب</span><button class="sb" id="zin">قرّب ＋</button><button class="sb" id="zout">بعّد －</button></div>
 <div class="g"><span>الصورة</span><button class="sb" id="rot">تدوير ⟳</button><button class="sb" id="mir">مرآة ⇄</button><button class="sb" id="rl">ميل ↺</button><button class="sb" id="rr2">ميل ↻</button></div>
+<div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button></div>
 <div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
 </div>
 </div>
 <div id="sheet" hidden></div>
@@ -154,10 +155,12 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
 <span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
+<span>• ثلاثي الأبعاد (دوران ↶ ↷ وميل ⤒ ⤓): يدير صورتك كأنها لوحة في الفضاء بمنظور ثلاثي الأبعاد، و«عادي» يعيدها.</span>
 <span>• ميل ↺ ↻: يعدّل ميل الصورة درجتين في كل ضغطة (يُحفظ لكل كاميرا).</span>
 <span>• الواجهة (أعلى الكاميرا): «شاشة كاملة» تجعل الكاميرا بملء الشاشة والأزرار فوقها، و«عادية» تجعلها في الوسط والأزرار تحتها.</span>
 <span>• أعلى / أخفض: يرفع أو يخفض صوت المايك. كتم: يوقف الصوت.</span>
 <span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
+<span>• إزالة: لطيفة / متوسطة / قوية. إذا بقيت أجزاء من خلفيتك القديمة اجعلها «قوية»، وإذا اختفت أطراف من جسمك اجعلها «لطيفة».</span>
 <span>• كبّر / صغّر (حجمك): يكبّر أو يصغّر الشخص داخل الخلفية. وتحرّكه بإصبعك.</span>
 <span>• بدون خلفية: يرجع للخلفية الأصلية.</span>
 <span>• عرض البيانات: يفتح قائمة بياناتك لتظهر على الفيديو. اضغطه مرة أخرى لإخفائها.</span>
@@ -169,6 +172,7 @@ textarea.in{min-height:110px;resize:vertical}
 <input id="dfile" type="file" hidden>
 <div id="toast" hidden></div>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="mk" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncA id="mkf" type="linear" slope="10" intercept="-6"/></feComponentTransfer></filter></svg>
 <video id="bgv" loop muted playsinline style="position:absolute;width:2px;height:2px;opacity:0;pointer-events:none"></video>
 <input id="bgf" type="file" accept="image/*,video/*" hidden>
 
@@ -183,10 +187,10 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FM=+(localStorage.getItem('fm2')||2),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
-const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
+const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
 
 try{const s=JSON.parse(localStorage.getItem('people2')||'null');if(s){people=s.p||[];sel=new Set(s.s||[])}
  else{const o=JSON.parse(localStorage.getItem('person')||'null');if(o)o.t.forEach((t,i)=>{const id='old'+i;people.push({id,t,d:o.d[i]})})}}catch(e){}
@@ -301,7 +305,7 @@ $('#next').onclick=async()=>{
 async function startCam(){
  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
  const v=$('#v');v.srcObject=null;const P=por();
- stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:960},height:{ideal:P?960:720},frameRate:{ideal:24,max:30}},audio:false});
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:960},height:{ideal:P?960:720},frameRate:{ideal:24,max:30},resizeMode:{ideal:'none'}},audio:false});
  v.srcObject=stream;await v.play();autoRot();
  try{const t=stream.getVideoTracks()[0],c=t.getCapabilities&&t.getCapabilities();if(c&&c.zoom)await t.applyConstraints({advanced:[{zoom:c.zoom.min}]})}catch(e){}
  zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
@@ -334,13 +338,18 @@ async function calib(v){ // لا يغيّر الاتجاه إلا إذا كان 
 $('#rot').onclick=()=>{ROT=(ROT+90)%360;rebuild();calibrated=true;lastBox=null;lastVer=0;try{localStorage.setItem('rot2_'+facing,ROT)}catch(e){}flash('تدوير '+ROT+'° (محفوظ لهذه الكاميرا)')};
 const FML=['بدون زوم','زوم خفيف','ملء الشاشة'];
 $('#fill').textContent='حجم الصورة: '+FML[FM];
-$('#fill').onclick=()=>{FM=(FM+1)%3;try{localStorage.setItem('fm2',FM)}catch(e){}$('#fill').textContent='حجم الصورة: '+FML[FM];flash(FM===0?'بدون زوم: المشهد كامل والأطراف ضبابية':FM===1?'زوم خفيف':'ملء الشاشة (قد يظهر زوم)')};
+$('#fill').onclick=()=>{FM=(FM+1)%3;try{localStorage.setItem('fm3',FM)}catch(e){}$('#fill').textContent='حجم الصورة: '+FML[FM];flash(FM===0?'بدون زوم: المشهد كامل والأطراف ضبابية':FM===1?'زوم خفيف':'ملء الشاشة (قد يظهر زوم)')};
 $('#rot2').onclick=()=>$('#rot').onclick();
 $('#mir2').onclick=()=>$('#mir').onclick();
 const saveRoll=()=>{try{localStorage.setItem('roll_'+facing,ROLL)}catch(e){}flash('الميل '+ROLL+'°')};
 $('#rl').onclick=()=>{ROLL=Math.max(-30,ROLL-2);saveRoll()};
 $('#rr2').onclick=()=>{ROLL=Math.min(30,ROLL+2);saveRoll()};
 applyUI();$('#ui').onclick=()=>{UIF=!UIF;try{localStorage.setItem('ui',UIF?'1':'0')}catch(e){}applyUI()};
+$('#y1').onclick=()=>{Y3=Math.max(-70,Y3-10);flash('دوران '+Y3+'°')};
+$('#y2').onclick=()=>{Y3=Math.min(70,Y3+10);flash('دوران '+Y3+'°')};
+$('#p1').onclick=()=>{P3=Math.max(-70,P3-10);flash('ميل '+P3+'°')};
+$('#p2').onclick=()=>{P3=Math.min(70,P3+10);flash('ميل '+P3+'°')};
+$('#r3').onclick=()=>{Y3=0;P3=0;flash('الوضع العادي')};
 $('#mir').onclick=()=>{MIR=!MIR;try{localStorage.setItem('mir_'+facing,MIR?'1':'0')}catch(e){}flash(MIR?'المرآة: مفعّلة':'المرآة: مطفأة')};
 async function setZoom(d){
  const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities&&t.getCapabilities();
@@ -370,7 +379,9 @@ function paint(t){
  else{
   if(FM<2){bsc.width=24;bsc.height=Math.max(8,Math.round(24*cvs.height/cvs.width));bsx.drawImage(v,0,0,bsc.width,bsc.height);cx.imageSmoothingEnabled=true;cx.drawImage(bsc,0,0,cvs.width,cvs.height);cx.fillStyle='rgba(0,0,0,.3)';cx.fillRect(0,0,cvs.width,cvs.height)}
   else{cx.fillStyle='#000';cx.fillRect(0,0,cvs.width,cvs.height)}
-  drawV(cx,v,v.videoWidth,v.videoHeight,DZ);drawOvl();
+  if(Y3||P3){if(pc.width!==cvs.width||pc.height!==cvs.height){pc.width=cvs.width;pc.height=cvs.height}pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,pc.width,pc.height);drawV(pcx,v,v.videoWidth,v.videoHeight,DZ);render3D(pc,0,0,cvs.width,cvs.height)}
+  else drawV(cx,v,v.videoWidth,v.videoHeight,DZ);
+  drawOvl();
  }
 }
 function startRecorder(){
@@ -454,16 +465,33 @@ async function look(g){
 }
 
 /* ---------- تبديل الخلفية + تحريك الشخص داخلها ---------- */
+function render3D(src,dx,dy,dw,dh){ // يرسم الصورة داخل المستطيل بمنظور ثلاثي الأبعاد (دوران ومَيَلان)
+ if(!Y3&&!P3){cx.drawImage(src,dx,dy,dw,dh);return}
+ const yw=Y3*Math.PI/180,pt=P3*Math.PI/180,D=1.7,sw=src.width,sh=src.height,N=36;let cur=src;
+ if(P3){
+  if(t3.width!==sw||t3.height!==sh){t3.width=sw;t3.height=sh}
+  t3x.clearRect(0,0,sw,sh);
+  const f=y=>1/(1+y*Math.sin(pt)/D),g=y=>y*Math.cos(pt)*f(y);
+  for(let i=0;i<N;i++){const y0=i/N-.5,y1=(i+1)/N-.5,sc=f((y0+y1)/2),Y0=g(y0),Y1=g(y1);
+   t3x.drawImage(src,0,i*sh/N,sw,sh/N+1,sw/2-sw*sc/2,sh/2+Y0*sh,sw*sc,(Y1-Y0)*sh+1)}
+  cur=t3;
+ }
+ if(Y3){
+  const f=x=>1/(1+x*Math.sin(yw)/D),g=x=>x*Math.cos(yw)*f(x);
+  for(let i=0;i<N;i++){const x0=i/N-.5,x1=(i+1)/N-.5,sc=f((x0+x1)/2),X0=g(x0),X1=g(x1);
+   cx.drawImage(cur,i*sw/N,0,sw/N+1,sh,dx+dw/2+X0*dw,dy+dh/2-dh*sc/2,(X1-X0)*dw+1,dh*sc)}
+ }else cx.drawImage(cur,dx,dy,dw,dh);
+}
 function onSeg(r){
  if(!drawOn||!bg)return;
  const v=$('#v'),m=r.segmentationMask,W=cvs.width,H=cvs.height;if(!W||!v.videoWidth)return;
  if(pc.width!==W||pc.height!==H){pc.width=W;pc.height=H}
  pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,W,H);
- pcx.filter='blur(2px)';drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
+ pcx.filter='url(#mk) blur(1.5px)';drawV(pcx,m,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
  pcx.globalCompositeOperation='source-in';drawV(pcx,r.image||v,v.videoWidth,v.videoHeight,DZ,FM);
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
- const pw=W*ps,ph=H*ps;cx.drawImage(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
+ const pw=W*ps,ph=H*ps;render3D(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
  drawOvl();
 }
 let segP=null;
@@ -489,6 +517,9 @@ $('#bgf').onchange=async e=>{
 function clearBg(){bg=null;bgv.pause();$('#nobg').hidden=true;updPrev()}
 $('#nobg').onclick=clearBg;
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const MKL=['لطيفة','متوسطة','قوية'],MKT=[.4,.5,.6];let mkl=+(localStorage.getItem('mk1')||2);if(!(mkl>=0&&mkl<3))mkl=2;
+function applyMk(){$('#mkf').setAttribute('intercept',String(-10*MKT[mkl]));$('#mkb').textContent='إزالة: '+MKL[mkl]}
+applyMk();$('#mkb').onclick=()=>{mkl=(mkl+1)%3;try{localStorage.setItem('mk1',mkl)}catch(e){}applyMk();flash('قوة إزالة الخلفية: '+MKL[mkl])};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 const ptrs=new Map();let pd=0;const stage=$('#stage');
