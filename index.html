@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 28</p>
+<p style="text-align:center;font-size:15px">الإصدار 29</p>
 </section>
 
 <section id="person" hidden>
@@ -92,6 +92,7 @@ textarea.in{min-height:110px;resize:vertical}
 <input id="file" type="file" accept="image/*" multiple hidden>
 <button id="lv">الحساسية: متوسطة</button>
 <button id="gr">مهلة الإيقاف: فوري</button>
+<button id="ql">جودة الفيديو: عالية</button>
 <button class="main" id="next" disabled>حفظ والمتابعة</button>
 <button id="clr" style="border-color:var(--red);color:var(--red)">حذف كل الصور</button>
 <button id="back1">رجوع</button>
@@ -163,6 +164,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• الخلفية: تختار صورة أو فيديو من المعرض ليحلّ مكان خلفيتك.</span>
 <span>• إزالة: لطيفة / متوسطة / قوية. إذا بقيت أجزاء من خلفيتك القديمة اجعلها «قوية»، وإذا اختفت أطراف من جسمك اجعلها «لطيفة».</span>
 <span>• كبّر / صغّر (حجمك): يكبّر أو يصغّر الشخص داخل الخلفية. وتحرّكه بإصبعك.</span>
+<span>• جودة الفيديو (شاشة اختيار الشخص): عادية، عالية، ممتازة. الأعلى أوضح وأكبر حجماً.</span>
 <span>• حذف لون: اضغطه ثم اضغط على الشاشة فوق أي شيء من خلفيتك القديمة ظهر بالخطأ (مثل الأحمر)، فيُحذف لونه. مسح الألوان: يلغي ذلك.</span>
 <span>• بدون خلفية: يرجع للخلفية الأصلية.</span>
 <span>• عرض البيانات: يفتح قائمة بياناتك لتظهر على الفيديو. اضغطه مرة أخرى لإخفائها.</span>
@@ -184,6 +186,8 @@ const $=s=>document.querySelector(s);
 const MP='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
 // th = تطابق مباشر | loose = تطابق متساهل أثناء تتبع الشخص بعد التعرّف عليه
 const LV=[{n:'دقيقة',th:.5,loose:.65},{n:'متوسطة',th:.6,loose:.8},{n:'واسعة',th:.68,loose:.92}];
+const QL=[{n:'عادية',L:960,bps:2.5e6,w:720,h:960},{n:'عالية',L:1280,bps:5e6,w:960,h:1280},{n:'ممتازة',L:1600,bps:8e6,w:1080,h:1440}];
+let qli=+(localStorage.getItem('ql')||1);if(!(qli>=0&&qli<3))qli=1;
 const GR=[250,700,1500,3000],GRL=['فوري','قصيرة','ثانية ونصف','3 ثوانٍ'];
 let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
@@ -249,6 +253,8 @@ function drawFaces(){
 $('#clr').onclick=()=>{if(!people.length||!confirm('حذف كل الصور المحفوظة؟'))return;people=[];sel.clear();persist();try{localStorage.removeItem('person')}catch(e){}drawFaces()};
 $('#lv').textContent='الحساسية: '+LV[lv].n;
 $('#gr').textContent='مهلة الإيقاف: '+GRL[gri];
+$('#ql').textContent='جودة الفيديو: '+QL[qli].n;
+$('#ql').onclick=()=>{qli=(qli+1)%3;localStorage.setItem('ql',qli);$('#ql').textContent='جودة الفيديو: '+QL[qli].n;toast(qli===0?'عادية: أخف على الجوال وحجم أصغر':qli===1?'عالية: توازن بين الجودة والسرعة':'ممتازة: أوضح وأكبر حجماً، وقد تثقل على الجوال الضعيف')};
 $('#gr').onclick=()=>{gri=(gri+1)%GR.length;localStorage.setItem('gr2',gri);$('#gr').textContent='مهلة الإيقاف: '+GRL[gri]};
 $('#lv').onclick=()=>{lv=(lv+1)%3;localStorage.setItem('lv',lv);$('#lv').textContent='الحساسية: '+LV[lv].n};
 async function shrink(f){ // تصغير الصورة قبل التحليل لتسريعه
@@ -307,7 +313,7 @@ $('#next').onclick=async()=>{
 async function startCam(){
  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
  const v=$('#v');v.srcObject=null;const P=por();
- stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?720:960},height:{ideal:P?960:720},frameRate:{ideal:24,max:30},resizeMode:{ideal:'none'}},audio:false});
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:P?QL[qli].w:QL[qli].h},height:{ideal:P?QL[qli].h:QL[qli].w},frameRate:{ideal:24,max:30},resizeMode:{ideal:'none'}},audio:false});
  v.srcObject=stream;await v.play();autoRot();
  try{const t=stream.getVideoTracks()[0],c=t.getCapabilities&&t.getCapabilities();if(c&&c.zoom)await t.applyConstraints({advanced:[{zoom:c.zoom.min}]})}catch(e){}
  zoom=1;DZ=1;lastBox=null;lastVer=0;updPrev();
@@ -378,9 +384,9 @@ function drawV(ctx,src,sw,sh,z,fm){
 function paint(t){
  if(!drawOn)return;
  requestAnimationFrame(paint);
- if(t-lastPaint<33)return;lastPaint=t;spinTick(t);
+ if(t-lastPaint<33)return;lastPaint=t;spinTick(t);cx.imageSmoothingQuality='high';
  const v=$('#v');if(!v.videoWidth)return;
- if(!cvs.width){const r=$('#stage').getBoundingClientRect(),a=Math.max(.4,Math.min(.8,Math.min(r.width,r.height)/Math.max(r.width,r.height)||.56)),L=1200,m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}
+ if(!cvs.width){const r=$('#stage').getBoundingClientRect(),a=Math.max(.4,Math.min(.8,Math.min(r.width,r.height)/Math.max(r.width,r.height)||.56)),L=QL[qli].L,m=Math.round(L*a/2)*2;cvs.width=por()?m:L;cvs.height=por()?L:m}
  if(bg&&seg){if(!segBusy&&t-lastSeg>=66){segBusy=true;lastSeg=t;seg.send({image:v}).catch(()=>{}).finally(()=>segBusy=false)}}
  else{
   if(FM<2){bsc.width=24;bsc.height=Math.max(8,Math.round(24*cvs.height/cvs.width));bsx.drawImage(v,0,0,bsc.width,bsc.height);cx.imageSmoothingEnabled=true;cx.drawImage(bsc,0,0,cvs.width,cvs.height);cx.fillStyle='rgba(0,0,0,.3)';cx.fillRect(0,0,cvs.width,cvs.height)}
@@ -394,7 +400,7 @@ function startRecorder(){
  let tries=0;const w=setInterval(()=>{
   if(cvs.width||++tries>40){clearInterval(w);if(!running)return;
    const out=new MediaStream([...cvs.captureStream(30).getVideoTracks(),...(dest?dest.stream.getAudioTracks():[])]);
-   rec=new MediaRecorder(out,mime?{mimeType:mime,videoBitsPerSecond:2.5e6}:{videoBitsPerSecond:2.5e6});
+   rec=new MediaRecorder(out,mime?{mimeType:mime,videoBitsPerSecond:QL[qli].bps,audioBitsPerSecond:128000}:{videoBitsPerSecond:QL[qli].bps});
    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
    rec.onerror=()=>note('حدث خطأ في المسجّل');
    rec.start(1000);rec.pause();setStatus(false);look(++gen);
@@ -509,7 +515,8 @@ function onSeg(r){
   const A=mkx.getImageData(0,0,w2,h2),B=ikx.getImageData(0,0,w2,h2).data,d=A.data;
   for(let i=0;i<d.length;i+=4){if(d[i+3]<8)continue;const c=rgb2hsv(B[i],B[i+1],B[i+2]);
    for(const q of rmCols){const dh=Math.min(Math.abs(c[0]-q[0]),360-Math.abs(c[0]-q[0]));
-    if(dh<22&&Math.abs(c[1]-q[1])<.4&&Math.abs(c[2]-q[2])<.5&&c[1]>.2){d[i+3]=0;break}}}
+    if(q[1]<.25||q[2]<.2){if(c[1]<.4&&Math.abs(c[2]-q[2])<.15){d[i+3]=0;break}}
+    else if(dh<22&&Math.abs(c[1]-q[1])<.4&&Math.abs(c[2]-q[2])<.5&&c[1]>.2){d[i+3]=0;break}}}
   mkx.putImageData(A,0,0);msrc2=mk;
  }
  pcx.filter='url(#mk) blur(1.5px)';drawV(pcx,msrc2,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
@@ -769,7 +776,7 @@ const DB={
  async put(o){const d=await this.open();return new Promise(res=>{const t=d.transaction('v','readwrite');t.objectStore('v').put(o);t.oncomplete=()=>res(true);t.onerror=()=>res(false)})},
  async del(id){const d=await this.open();return new Promise(res=>{const t=d.transaction('v','readwrite');t.objectStore('v').delete(id);t.oncomplete=()=>res(true);t.onerror=()=>res(false)})}
 };
-DB.all().then(a=>{vids=a.sort((x,y)=>y.at-x.at).map(o=>({id:o.id,url:URL.createObjectURL(o.blob),ext:o.ext,ms:o.ms,at:new Date(o.at)}));if(curS==='vids')drawVids()}).catch(()=>{});
+DB.all().then(a=>{vids=a.sort((x,y)=>y.at-x.at).map(o=>({id:o.id,url:URL.createObjectURL(o.blob),ext:o.ext,ms:o.ms,at:new Date(o.at),size:o.blob.size,w:o.w,h:o.h}));if(curS==='vids')drawVids()}).catch(()=>{});
 
 /* ---------- الإنهاء وقائمة الفيديوهات ---------- */
 function finish(){
@@ -781,8 +788,8 @@ function finish(){
    if(astream){astream.getTracks().forEach(t=>t.stop());astream=null}
    if(rec&&chunks.length&&recMs>0){
     const type=(rec.mimeType||mime||'video/webm').split(';')[0];
-    const blob=new Blob(chunks,{type}),o={id:String(Date.now()),ext:type.includes('mp4')?'mp4':'webm',ms:recMs,at:Date.now(),blob};
-    DB.put(o).catch(()=>{});vids.unshift({id:o.id,url:URL.createObjectURL(blob),ext:o.ext,ms:o.ms,at:new Date(o.at)});
+    const blob=new Blob(chunks,{type}),o={id:String(Date.now()),ext:type.includes('mp4')?'mp4':'webm',ms:recMs,at:Date.now(),blob,w:cvs.width,h:cvs.height};
+    DB.put(o).catch(()=>{});vids.unshift({id:o.id,url:URL.createObjectURL(blob),ext:o.ext,ms:o.ms,at:new Date(o.at),size:blob.size,w:o.w,h:o.h});
    }
    res();
   };
@@ -796,9 +803,11 @@ function drawVids(){
  $('#empty').textContent=vids.length?'الفيديوهات محفوظة داخل التطبيق. اضغط «حفظ في الجوال» لنسخها إلى مجلد التنزيلات (Download) في جوالك.':'لا توجد فيديوهات بعد. ابدأ تصويراً جديداً.';
  vids.forEach(v=>{
   const d=document.createElement('div');d.className='vid';
-  d.innerHTML='<b></b><video controls playsinline></video><a><button class="main">حفظ في الجوال</button></a><button class="rm" style="border-color:var(--red);color:var(--red)">حذف الفيديو</button>';
+  d.innerHTML='<b></b><span class="inf"></span><video controls playsinline></video><button class="fs">تشغيل بملء الشاشة</button><a><button class="main">حفظ في الجوال</button></a><button class="rm" style="border-color:var(--red);color:var(--red)">حذف الفيديو</button>';
   d.querySelector('b').textContent='فيديو '+fmt(v.ms)+' — '+v.at.toLocaleString('ar');
   d.querySelector('video').src=v.url;
+  d.querySelector('.inf').textContent=(v.w?'الدقة '+v.w+'×'+v.h+'  ':'')+(v.size?'| الحجم '+(v.size/1048576).toFixed(1)+' ميغابايت':'');
+  d.querySelector('.fs').onclick=()=>{const vd=d.querySelector('video');try{(vd.requestFullscreen||vd.webkitRequestFullscreen).call(vd)}catch(e){}vd.play()};
   const a=d.querySelector('a');a.href=v.url;a.download='video-'+v.at.toISOString().slice(0,19).replace(/[:T]/g,'-')+'.'+v.ext;
   d.querySelector('.rm').onclick=()=>{if(!confirm('حذف هذا الفيديو نهائياً؟'))return;DB.del(v.id);URL.revokeObjectURL(v.url);vids=vids.filter(x=>x!==v);drawVids()};
   l.appendChild(d);
