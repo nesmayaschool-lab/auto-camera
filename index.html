@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 33</p>
+<p style="text-align:center;font-size:15px">الإصدار 34</p>
 <button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
@@ -516,7 +516,7 @@ function onSeg(r){
   mkx.clearRect(0,0,w2,h2);mkx.drawImage(m,0,0,w2,h2);ikx.drawImage(r.image||v,0,0,w2,h2);
   const A=mkx.getImageData(0,0,w2,h2),B=ikx.getImageData(0,0,w2,h2).data,d=A.data,rem=new Uint8Array(n);
   for(let k=0;k<n;k++){const i=k*4;if(d[i+3]<8)continue;const c=rgb2hsv(B[i],B[i+1],B[i+2]);let hit=false;
-   if(AUTOCLR&&(((c[0]>=300||c[0]<=8)&&c[1]>=.55&&c[2]>=.3)||(c[0]>=70&&c[0]<=165&&c[1]>=.35&&c[2]>=.2)))hit=true;
+   if(AUTOCLR&&(((c[0]>=300||c[0]<=8)&&c[1]>=.55&&c[2]>=.3)||(c[0]>=70&&c[0]<=165&&c[1]>=.35&&c[2]>=.2)||(c[0]>=290&&c[0]<=352&&c[1]>=.2&&c[2]>=.3)))hit=true;
    if(!hit)for(const q of rmCols){const dh=Math.min(Math.abs(c[0]-q[0]),360-Math.abs(c[0]-q[0]));
     if(q[1]<.25||q[2]<.2){if(c[1]<.4&&Math.abs(c[2]-q[2])<.15){hit=true;break}}
     else if(dh<22&&Math.abs(c[1]-q[1])<.4&&Math.abs(c[2]-q[2])<.5&&c[1]>.2){hit=true;break}}
@@ -530,6 +530,19 @@ function onSeg(r){
    const sx=w2/dc.width,sy=h2/dc.height,bx=lastBox.x*sx,bw=lastBox.width*sx,by=lastBox.y*sy,bh=lastBox.height*sy;
    const MG=[0,[1.2,1.6],[.9,1.2],[.6,.8]][ACL]||[.9,1.2],top=by-MG[0]*bh,chin=by+bh,x0=bx-MG[1]*bw,x1=bx+bw+MG[1]*bw;
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++)if(y<top||(y<chin&&(x<x0||x>x1)))rem[y*w2+x]=1;
+  }
+  if(ACL>=2){
+   const lab=new Int32Array(n),sizes=[0],st=new Int32Array(n);let cur=0;
+   const ok=t=>!lab[t]&&!rem[t]&&d[t*4+3]>=128;
+   for(let k=0;k<n;k++){if(!ok(k))continue;cur++;let sp=0,cnt=0;st[sp++]=k;lab[k]=cur;
+    while(sp){const q=st[--sp];cnt++;const x=q%w2,y=(q/w2)|0;
+     if(x>0&&ok(q-1)){lab[q-1]=cur;st[sp++]=q-1}
+     if(x<w2-1&&ok(q+1)){lab[q+1]=cur;st[sp++]=q+1}
+     if(y>0&&ok(q-w2)){lab[q-w2]=cur;st[sp++]=q-w2}
+     if(y<h2-1&&ok(q+w2)){lab[q+w2]=cur;st[sp++]=q+w2}}
+    sizes[cur]=cnt}
+   let mx=0;for(let i=1;i<=cur;i++)if(sizes[i]>mx)mx=sizes[i];
+   for(let k=0;k<n;k++){const L=lab[k];if(L&&sizes[L]<mx*.2)rem[k]=1}
   }
   for(let k=0;k<n;k++)if(rem[k])d[k*4+3]=0;
   mkx.putImageData(A,0,0);msrc2=mk;
