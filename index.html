@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 30</p>
+<p style="text-align:center;font-size:15px">الإصدار 31</p>
 </section>
 
 <section id="person" hidden>
@@ -165,7 +165,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• إزالة: لطيفة / متوسطة / قوية. إذا بقيت أجزاء من خلفيتك القديمة اجعلها «قوية»، وإذا اختفت أطراف من جسمك اجعلها «لطيفة».</span>
 <span>• كبّر / صغّر (حجمك): يكبّر أو يصغّر الشخص داخل الخلفية. وتحرّكه بإصبعك.</span>
 <span>• جودة الفيديو (شاشة اختيار الشخص): عادية، عالية، ممتازة. الأعلى أوضح وأكبر حجماً.</span>
-<span>• تنظيف تلقائي: يحذف من خلفيتك القديمة كل شيء أحمر أو وردي أو أخضر زاهٍ (زهور، نباتات...) فلا يظهر على الخلفية الجديدة. أوقفه إذا كانت ملابسك بهذه الألوان.</span>
+<span>• تنظيف تلقائي: يحذف من خلفيتك القديمة كل شيء أحمر أو وردي أو أخضر زاهٍ (زهور، نباتات...)، وأي شيء يظهر فوق رأسك أو بجانبه، فلا يظهر على الخلفية الجديدة. أوقفه إذا كانت ملابسك بهذه الألوان.</span>
 <span>• حذف لون: اضغطه ثم اضغط على الشاشة فوق أي شيء من خلفيتك القديمة ظهر بالخطأ (مثل الأحمر)، فيُحذف لونه. مسح الألوان: يلغي ذلك.</span>
 <span>• بدون خلفية: يرجع للخلفية الأصلية.</span>
 <span>• عرض البيانات: يفتح قائمة بياناتك لتظهر على الفيديو. اضغطه مرة أخرى لإخفائها.</span>
@@ -525,6 +525,11 @@ function onSeg(r){
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const xx=x+q;if(xx>=0&&xx<w2&&rem[y*w2+xx])m1=1}t[y*w2+x]=m1}
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const yy=y+q;if(yy>=0&&yy<h2&&t[yy*w2+x])m1=1}rem[y*w2+x]=m1}
   }
+  if(AUTOCLR&&ROT===0&&DZ===1&&lastBox&&dc.width&&Date.now()-lastT<2000){
+   const sx=w2/dc.width,sy=h2/dc.height,bx=lastBox.x*sx,bw=lastBox.width*sx,by=lastBox.y*sy,bh=lastBox.height*sy;
+   const top=by-.6*bh,chin=by+bh,x0=bx-2.2*bw,x1=bx+bw+2.2*bw;
+   for(let y=0;y<h2;y++)for(let x=0;x<w2;x++)if(y<top||(y<chin&&(x<x0||x>x1)))rem[y*w2+x]=1;
+  }
   for(let k=0;k<n;k++)if(rem[k])d[k*4+3]=0;
   mkx.putImageData(A,0,0);msrc2=mk;
  }
@@ -551,7 +556,11 @@ $('#bgf').onchange=async e=>{
   await loadSeg();const url=URL.createObjectURL(f);
   if(f.type.startsWith('video')){bgv.src=url;await bgv.play();bg=bgv;bgType='video'}
   else{const im=new Image();im.src=url;await im.decode();bg=im;bgType='img'}
-  ps=1;pxc=.5;pyc=.5;updPrev();$('#nobg').hidden=false;note('');
+  ps=1;pxc=.5;
+  {const v=$('#v'),W=cvs.width,H=cvs.height;let off=0;
+   if(v.videoWidth&&W){const q=ROT%180===0,ew=q?v.videoWidth:v.videoHeight,eh=q?v.videoHeight:v.videoWidth,a=W/ew,b=H/eh,lo=Math.min(a,b),hi=Math.max(a,b),k=(FM===2?hi:FM===1?lo+(hi-lo)*.5:lo)*DZ,fh=eh*k;off=Math.max(0,(H-fh)/(2*H))}
+   pyc=.5+off}
+  updPrev();$('#nobg').hidden=false;note('');
   flash('حرّك الشخص بإصبعك، وكبّره بإصبعين أو بزر حجمك');
  }catch(er){note('تعذّر تجهيز الخلفية. تأكد من الإنترنت وجرّب مرة أخرى.')}
 };
@@ -563,7 +572,7 @@ function applyMk(){$('#mkf').setAttribute('intercept',String(-10*MKT[mkl]));$('#
 applyMk();$('#mkb').onclick=()=>{mkl=(mkl+1)%3;try{localStorage.setItem('mk1',mkl)}catch(e){}applyMk();flash('قوة إزالة الخلفية: '+MKL[mkl])};
 $('#pick').onclick=()=>{pickMode=true;toast('اضغط على الشاشة فوق اللون الذي تريد حذفه (مثلاً الشيء الأحمر)')};
 $('#ac').textContent='تنظيف تلقائي: '+(AUTOCLR?'نعم':'لا');
-$('#ac').onclick=()=>{AUTOCLR=!AUTOCLR;try{localStorage.setItem('ac',AUTOCLR?'1':'0')}catch(e){}$('#ac').textContent='تنظيف تلقائي: '+(AUTOCLR?'نعم':'لا');toast(AUTOCLR?'سيُحذف تلقائياً كل ما هو أحمر أو وردي أو أخضر زاهٍ من الخلفية القديمة':'أُوقف التنظيف التلقائي')};
+$('#ac').onclick=()=>{AUTOCLR=!AUTOCLR;try{localStorage.setItem('ac',AUTOCLR?'1':'0')}catch(e){}$('#ac').textContent='تنظيف تلقائي: '+(AUTOCLR?'نعم':'لا');toast(AUTOCLR?'سيُحذف تلقائياً الأحمر والوردي والأخضر الزاهي، وأي شيء يظهر فوق رأسك أو بجانبه':'أُوقف التنظيف التلقائي')};
 $('#unpick').onclick=()=>{rmCols=[];pickMode=false;toast('تم مسح كل الألوان المحذوفة')};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
