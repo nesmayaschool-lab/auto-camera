@@ -77,7 +77,8 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 32</p>
+<p style="text-align:center;font-size:15px">الإصدار 33</p>
+<button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
 <section id="person" hidden>
@@ -846,6 +847,11 @@ document.addEventListener('visibilitychange',async()=>{
  look(++gen);
 });
 setTimeout(()=>{if(window.faceapi)loadModels().catch(()=>{})},1200); // تحميل أداة التعرف مسبقاً في الخلفية
+$('#upd').onclick=async()=>{ // يمسح النسخ المخزّنة ويحمّل الأحدث
+ try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister()}}catch(e){}
+ try{const ks=await caches.keys();for(const k of ks)await caches.delete(k)}catch(e){}
+ location.href=location.pathname+'?v='+Date.now();
+};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
