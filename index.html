@@ -77,7 +77,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 35</p>
+<p style="text-align:center;font-size:15px">الإصدار 36</p>
 <button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
@@ -109,7 +109,7 @@ textarea.in{min-height:110px;resize:vertical}
 <div class="g"><span>الصورة</span><button class="sb" id="rot">تدوير ⟳</button><button class="sb" id="mir">مرآة ⇄</button><button class="sb" id="rl">ميل ↺</button><button class="sb" id="rr2">ميل ↻</button></div>
 <div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button><button class="sb" id="sy">لفّ رأسي ↻</button><button class="sb" id="sx">لفّ أفقي ⟳</button><button class="sb" id="ss">سرعة: وسط</button></div>
 <div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="ac">تنظيف: خفيف</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="ac">تنظيف: متوسط</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
 </div>
 </div>
 <div id="sheet" hidden></div>
@@ -195,7 +195,7 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac3')||1),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac4')||2),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),mk=document.createElement('canvas'),mkx=mk.getContext('2d',{willReadFrequently:true}),ik=document.createElement('canvas'),ikx=ik.getContext('2d',{willReadFrequently:true}),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
@@ -533,7 +533,7 @@ function onSeg(r){
    const top=by-.9*bh,chin=by+bh,x0=bx-1.8*bw,x1=bx+bw+1.8*bw;
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++)if(y<top||(y<chin&&(x<x0||x>x1)))rem[y*w2+x]=1;
   }
-  if(ACL>=2){ // حذف الفتات الصغير المنفصل فقط (أقل من 4% من حجم الجسم)
+  if(ACL>=2){ // إبقاء الجسم المتصل بوجهك فقط وحذف الأشخاص والأشياء المنفصلة
    const lab=new Int32Array(n),sizes=[0],st=new Int32Array(n);let cur=0;
    const ok=t=>!lab[t]&&!rem[t]&&d[t*4+3]>=128;
    for(let k=0;k<n;k++){if(!ok(k))continue;cur++;let sp=0,cnt=0;st[sp++]=k;lab[k]=cur;
@@ -543,8 +543,11 @@ function onSeg(r){
      if(y>0&&ok(q-w2)){lab[q-w2]=cur;st[sp++]=q-w2}
      if(y<h2-1&&ok(q+w2)){lab[q+w2]=cur;st[sp++]=q+w2}}
     sizes[cur]=cnt}
-   let mx=0;for(let i=1;i<=cur;i++)if(sizes[i]>mx)mx=sizes[i];
-   for(let k=0;k<n;k++){const L=lab[k];if(L&&sizes[L]<mx*.04)rem[k]=1}
+   const keep=new Uint8Array(cur+1);
+   if(core){const fx0=Math.max(0,bx|0),fx1=Math.min(w2-1,(bx+bw)|0),fy0=Math.max(0,by|0),fy1=Math.min(h2-1,(by+bh)|0);
+    for(let y=fy0;y<=fy1;y++)for(let x=fx0;x<=fx1;x++){const L=lab[y*w2+x];if(L)keep[L]=1}}
+   const any=keep.some(z=>z);let mx=0;for(let i=1;i<=cur;i++)if(sizes[i]>mx)mx=sizes[i];
+   for(let k=0;k<n;k++){const L=lab[k];if(!L)continue;if(any?!keep[L]:sizes[L]<mx*.04)rem[k]=1}
   }
   for(let k=0;k<n;k++)if(rem[k])d[k*4+3]=0;
   mkx.putImageData(A,0,0);msrc2=mk;
@@ -589,7 +592,7 @@ applyMk();$('#mkb').onclick=()=>{mkl=(mkl+1)%3;try{localStorage.setItem('mk1',mk
 $('#pick').onclick=()=>{pickMode=true;toast('اضغط على الشاشة فوق اللون الذي تريد حذفه (مثلاً الشيء الأحمر)')};
 const ACN=['لا','خفيف','متوسط','قوي'];
 AUTOCLR=ACL>0;$('#ac').textContent='تنظيف: '+ACN[ACL];
-$('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac3',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: ويحذف أيضاً الفتات الصغير المنفصل':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
+$('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac4',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: يُبقي الجسم المتصل بوجهك فقط ويحذف الأشخاص والأشياء المنفصلة عنك':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
 $('#unpick').onclick=()=>{rmCols=[];pickMode=false;toast('تم مسح كل الألوان المحذوفة')};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
