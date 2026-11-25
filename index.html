@@ -62,16 +62,18 @@ input.in{width:100%;min-height:58px;border:2px solid #C9C5BD;border-radius:12px;
 #stage{position:relative;flex:1;min-height:0;border-radius:18px;overflow:hidden;background:#000;touch-action:none}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 #stage video{opacity:0}
-#side3{position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:6;width:152px;max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:rgba(0,0,0,.5);border-radius:18px;padding:8px}
-#side3 label{color:#FDE68A;font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:2px}
-#side3 input[type=range]{width:100%;height:36px;accent-color:#FDE68A}
-.s3t{color:#fff;font-weight:700;font-size:16px;text-align:center;cursor:pointer;padding:2px 0}
+#side3{position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:6;width:200px;max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);border-radius:18px;padding:10px}
+#side3 label{color:#FDE68A;font-size:17px;font-weight:700;display:flex;flex-direction:column;gap:2px}
+#side3 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:50px;background:transparent;margin:0}
+#side3 input[type=range]::-webkit-slider-runnable-track{height:18px;border-radius:9px;background:#6b7280}
+#side3 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:46px;height:46px;border-radius:23px;background:#FDE68A;border:4px solid #111;margin-top:-14px}
+.s3t{color:#fff;font-weight:700;font-size:18px;text-align:center;cursor:pointer;padding:2px 0}
 #side3.c #s3b{display:none}
 #cam.full #side3{top:90px;transform:none;max-height:calc(100% - 440px)}
 #side{position:absolute;right:6px;top:50%;transform:translateY(-50%);max-height:calc(100% - 10px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.45);border-radius:18px;padding:8px 6px}
 #side .g{display:flex;flex-direction:column;align-items:center;gap:6px}
 #side span{font-size:17px;font-weight:700;color:#FDE68A}
-#cam .sb{width:104px;height:54px;min-height:54px;border-radius:14px;padding:0 4px;font-size:20px;background:rgba(0,0,0,.72);border-width:2px}
+#cam .sb{width:120px;height:56px;min-height:56px;border-radius:14px;padding:0 4px;font-size:20px;background:rgba(0,0,0,.72);border-width:2px}
 textarea.in{min-height:110px;resize:vertical}
 #toast{position:fixed;left:14px;right:14px;bottom:90px;background:#222;color:#fff;padding:14px;border-radius:14px;font-size:20px;text-align:center;z-index:50}
 #sheet{position:static;max-height:46%;overflow-y:auto;background:rgba(10,22,48,.93);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px}
@@ -83,7 +85,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 38</p>
+<p style="text-align:center;font-size:15px">الإصدار 39</p>
 <button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
@@ -115,13 +117,13 @@ textarea.in{min-height:110px;resize:vertical}
 <div class="g"><span>الصورة</span><button class="sb" id="rot">تدوير ⟳</button><button class="sb" id="mir">مرآة ⇄</button><button class="sb" id="rl">ميل ↺</button><button class="sb" id="rr2">ميل ↻</button></div>
 <div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="d3">ضبط الزاوية</button><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button><button class="sb" id="sy">لفّ رأسي ↻</button><button class="sb" id="sx">لفّ أفقي ⟳</button><button class="sb" id="ss">سرعة: وسط</button></div>
 <div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="ac">تنظيف: متوسط</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="iso">عزلي: نعم</button><button class="sb" id="ac">تنظيف: متوسط</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
 </div>
 <div id="side3"><div class="s3t" id="s3t">أشرطة 3D ▾</div><div id="s3b">
-<label>حافة اليمين<input type="range" id="se_r" min="-100" max="100" value="0"></label>
-<label>حافة اليسار<input type="range" id="se_l" min="-100" max="100" value="0"></label>
-<label>حافة الأعلى<input type="range" id="se_t" min="-100" max="100" value="0"></label>
-<label>حافة الأسفل<input type="range" id="se_b" min="-100" max="100" value="0"></label>
+<label>دوران لليمين<input type="range" id="se_r" min="0" max="100" value="0"></label>
+<label>دوران لليسار<input type="range" id="se_l" min="0" max="100" value="0"></label>
+<label>ميل للأعلى<input type="range" id="se_t" min="0" max="100" value="0"></label>
+<label>ميل للأسفل<input type="range" id="se_b" min="0" max="100" value="0"></label>
 <button class="sb" id="s3r" style="width:100%">إعادة</button></div></div>
 </div>
 <div id="sheet" hidden></div>
@@ -169,7 +171,8 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
 <span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
-<span>• أشرطة 3D (في الجهة اليسرى): أربعة أشرطة: حافة اليمين وحافة اليسار وحافة الأعلى وحافة الأسفل. حرّك أي شريط يميناً ليقرّب تلك الحافة ويكبّرها، ويساراً ليبعدها ويصغّرها، فتدور الصورة وتميل كلوحة ثلاثية الأبعاد. زر إعادة يرجعها كما هي، وعنوان الأشرطة يطويها.</span>
+<span>• عزلي: يُبقي الشخص الذي اخترتَه وحده، ويحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة.</span>
+<span>• أشرطة 3D (في الجهة اليسرى): أربعة أشرطة عريضة: دوران لليمين، دوران لليسار، ميل للأعلى، ميل للأسفل. اسحب الشريط ليدور صورتك بمنظور ثلاثي الأبعاد حقيقي بالزاوية التي تريدها. إعادة ترجعها كما هي.</span>
 <span>• ضبط الزاوية: يفتح منزلقين تتحكم بهما بمقدار الدوران بدقة (رأسي وأفقي من -180° إلى 180°)، وزر المنظور: «بدون منظور» هو الأنظف بدون تموج.</span>
 <span>• لفّ رأسي / لفّ أفقي (تلقائي): يدير صورتك دورة كاملة باستمرار على الخلفية الجديدة (اضغطه مرة أخرى للإيقاف)، وسرعة: تغيّر سرعة الدوران. حرّك الشخص بإصبعك لتختار مكانه.</span>
 <span>• ثلاثي الأبعاد (دوران ↶ ↷ وميل ⤒ ⤓): يدير صورتك كأنها لوحة في الفضاء بمنظور ثلاثي الأبعاد، و«عادي» يعيدها.</span>
@@ -209,7 +212,7 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,PERSP=0,EL=1,ER=1,ET=1,EB=1,prevA=new Float32Array(0),ADH={b:new Float32Array(210),p:new Float32Array(210)},lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac4')||2),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,PERSP=1,sv={r:0,l:0,t:0,b:0},EL=1,ER=1,ET=1,EB=1,otherBoxes=[],otherT=0,ISOL=localStorage.getItem('iso')!=='0',prevA=new Float32Array(0),ADH={b:new Float32Array(210),p:new Float32Array(210)},lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac5')||3),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
 const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),mk=document.createElement('canvas'),mkx=mk.getContext('2d',{willReadFrequently:true}),ik=document.createElement('canvas'),ikx=ik.getContext('2d',{willReadFrequently:true}),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
@@ -374,9 +377,9 @@ $('#y2').onclick=()=>{Y3=Math.min(70,Y3+10);flash('دوران '+Y3+'°')};
 $('#p1').onclick=()=>{P3=Math.max(-70,P3-10);flash('ميل '+P3+'°')};
 $('#p2').onclick=()=>{P3=Math.min(70,P3+10);flash('ميل '+P3+'°')};
 $('#r3').onclick=()=>{reset3D();flash('الوضع العادي')};
-const e2=v=>v>=0?1+v/100*.35:1+v/100*.6;
-$('#se_r').oninput=e=>{ER=e2(+e.target.value)};$('#se_l').oninput=e=>{EL=e2(+e.target.value)};
-$('#se_t').oninput=e=>{ET=e2(+e.target.value)};$('#se_b').oninput=e=>{EB=e2(+e.target.value)};
+const upd3=()=>{SPIN='';Y3=(sv.r-sv.l)*.75;P3=(sv.b-sv.t)*.75};
+$('#se_r').oninput=e=>{sv.r=+e.target.value;upd3()};$('#se_l').oninput=e=>{sv.l=+e.target.value;upd3()};
+$('#se_t').oninput=e=>{sv.t=+e.target.value;upd3()};$('#se_b').oninput=e=>{sv.b=+e.target.value;upd3()};
 $('#s3r').onclick=()=>{reset3D();flash('أُعيدت الصورة كما هي')};
 $('#s3t').onclick=()=>{const c=$('#side3').classList.toggle('c');$('#s3t').textContent=c?'أشرطة 3D ◂':'أشرطة 3D ▾'};
 $('#d3').onclick=openSheet3D;
@@ -475,6 +478,7 @@ async function look(g){
    if(lastBox&&now-lastT<=5000&&now-lastVer<1500){ // فحص خفيف: هل يوجد وجه قرب آخر مكان؟
     const bs=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)),timeout(4000)]);
     n=bs.length;ms=Math.max(0,...bs.map(d=>d.score));const b=bs.map(d=>d.box).find(x=>nearLast(x,now));
+    otherBoxes=bs.map(d=>d.box).filter(x=>x!==b);otherT=now;
     if(b){hit=true;lastBox=b;lastT=now}
    }else{ // فحص كامل: مطابقة الوجه مع الصور
     const ds=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)).withFaceLandmarks(true).withFaceDescriptors(),timeout(6000)]);
@@ -483,6 +487,7 @@ async function look(g){
     if(h){if(h.e<L.th*.9&&now-lastLearn>2500&&refs.length<base+12){refs.push(h.d.descriptor);lastLearn=now}}
     else h=sc.filter(x=>x.e<L.loose&&nearLast(x.d.detection.box,now)).sort((a,b)=>a.e-b.e)[0];
     if(h){hit=true;lastBox=h.d.detection.box;lastT=now;lastVer=now}
+    otherBoxes=sc.filter(x=>x!==h).map(x=>x.d.detection.box);otherT=now;
    }
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
@@ -500,29 +505,29 @@ async function look(g){
 
 /* ---------- تبديل الخلفية + تحريك الشخص داخلها ---------- */
 function render3D(src,dx,dy,dw,dh){
- const edges=EL!==1||ER!==1||ET!==1||EB!==1;
- if(!Y3&&!P3&&!edges){cx.drawImage(src,dx,dy,dw,dh);return}
- const yw=Y3*Math.PI/180,pt=P3*Math.PI/180;let CX=Math.cos(yw),CY=Math.cos(pt);
- if(!PERSP&&!edges){ // دوران بسيط نظيف بدون تموج
-  if(Math.abs(CX)<.02||Math.abs(CY)<.02)return;
-  cx.save();cx.translate(dx+dw/2,dy+dh/2);cx.scale(CX,CY);cx.drawImage(src,-dw/2,-dh/2,dw,dh);cx.restore();return;
+ if(!Y3&&!P3){cx.drawImage(src,dx,dy,dw,dh);return}
+ const yw=Y3*Math.PI/180,pt=P3*Math.PI/180;
+ if(!PERSP){ // بدون منظور: دوران نظيف
+  const kx=Math.cos(yw),ky=Math.cos(pt);if(Math.abs(kx)<.02||Math.abs(ky)<.02)return;
+  cx.save();cx.translate(dx+dw/2,dy+dh/2);cx.scale(kx,ky);cx.drawImage(src,-dw/2,-dh/2,dw,dh);cx.restore();return;
  }
- const D=PERSP===1?3.5:PERSP===2?1.8:1e9,fx=x=>1/(1+x*Math.sin(yw)/D),fy=y=>1/(1+y*Math.sin(pt)/D);
- const eL=EL*fx(-.5),eR=ER*fx(.5),eT=ET*fy(-.5),eB=EB*fy(.5);
- CX*=Math.max(.35,1-.5*Math.abs(ER-EL));CY*=Math.max(.35,1-.5*Math.abs(EB-ET));
- if(Math.abs(CX)<.02||Math.abs(CY)<.02)return;
- const sw=src.width,sh=src.height,N=64,sg=v=>v>=0?1:-1,lerp=(a,b,t)=>a+(b-a)*t;let cur=src;
- if(P3||ET!==1||EB!==1||CY!==1){ // مرحلة الصفوف (حافة الأعلى والأسفل)
+ const D=PERSP===1?2.8:1.7,sw=src.width,sh=src.height,N=128,sg=v=>v>=0?1:-1;let cur=src;
+ cx.imageSmoothingEnabled=true;
+ if(P3){
   if(t3.width!==sw||t3.height!==sh){t3.width=sw;t3.height=sh}
   t3x.clearRect(0,0,sw,sh);
-  for(let i=0;i<N;i++){const y0=i/N,y1=(i+1)/N,wr=lerp(eT,eB,(y0+y1)/2),W2=sw*wr,Y0=sh/2+(y0-.5)*sh*CY,H2=(y1-y0)*sh*CY;
-   t3x.drawImage(src,0,y0*sh,sw,(y1-y0)*sh+1,sw/2-W2/2,Y0,W2,H2+sg(H2))}
+  const f=y=>1/(1+y*Math.sin(pt)/D),g=y=>y*Math.cos(pt)*f(y);
+  for(let i=0;i<N;i++){const y0=i/N-.5,y1=(i+1)/N-.5,sc=f((y0+y1)/2),Y0=g(y0),Y1=g(y1),h2=(Y1-Y0)*sh;
+   t3x.drawImage(src,0,i*sh/N,sw,sh/N+1,sw/2-sw*sc/2,sh/2+Y0*sh,sw*sc,h2+sg(h2))}
   cur=t3;
  }
- for(let i=0;i<N;i++){const x0=i/N,x1=(i+1)/N,hs=lerp(eL,eR,(x0+x1)/2),w2=(x1-x0)*dw*CX,H2=dh*hs; // مرحلة الأعمدة (حافة اليمين واليسار)
-  cx.drawImage(cur,x0*sw,0,(x1-x0)*sw+1,sh,dx+dw/2+(x0-.5)*dw*CX,dy+dh/2-H2/2,w2+sg(w2),H2)}
+ if(Y3){
+  const f=x=>1/(1+x*Math.sin(yw)/D),g=x=>x*Math.cos(yw)*f(x);
+  for(let i=0;i<N;i++){const x0=i/N-.5,x1=(i+1)/N-.5,sc=f((x0+x1)/2),X0=g(x0),X1=g(x1),w2=(X1-X0)*dw;
+   cx.drawImage(cur,i*sw/N,0,sw/N+1,sh,dx+dw/2+X0*dw,dy+dh/2-dh*sc/2,w2+sg(w2),dh*sc)}
+ }else cx.drawImage(cur,dx,dy,dw,dh);
 }
-function reset3D(){EL=ER=ET=EB=1;Y3=0;P3=0;SPIN='';['se_r','se_l','se_t','se_b'].forEach(i=>{$('#'+i).value=0})}
+function reset3D(){EL=ER=ET=EB=1;sv.r=sv.l=sv.t=sv.b=0;Y3=0;P3=0;SPIN='';['se_r','se_l','se_t','se_b'].forEach(i=>{$('#'+i).value=0})}
 function openSheet3D(){ // التحكم بمقدار الدوران بدقة
  const sh=$('#sheet');sh.innerHTML='';sh.hidden=false;
  const lab=t=>{const p=document.createElement('p');p.style.cssText='color:#fff;font-size:18px;text-align:right';p.textContent=t;sh.appendChild(p);return p};
@@ -591,9 +596,14 @@ function onSeg(r){
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const xx=x+q;if(xx>=0&&xx<w2&&au[y*w2+xx])m1=1}t[y*w2+x]=m1}
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const yy=y+q;if(yy>=0&&yy<h2&&t[yy*w2+x])m1=1}if(m1&&!inC(x,y))rem[y*w2+x]=1}
   }
+  if(ISOL&&core&&otherBoxes.length&&Date.now()-otherT<1500&&dc.width){ // عزل: حذف أجسام الوجوه الأخرى (خارج منطقتك المحميّة)
+   const sx2=w2/dc.width,sy2=h2/dc.height;
+   for(const ob of otherBoxes){const ox=ob.x*sx2,ow=ob.width*sx2,oy=ob.y*sy2,oh=ob.height*sy2,xa=Math.max(0,Math.floor(ox-1.3*ow)),xb=Math.min(w2-1,Math.ceil(ox+ow+1.3*ow)),ya=Math.max(0,Math.floor(oy-.7*oh));
+    for(let y=ya;y<h2;y++)for(let x=xa;x<=xb;x++)if(!inC(x,y))rem[y*w2+x]=1}
+  }
   if(ACL===3&&core){ // قوي: أي شيء فوق الرأس أو بعيداً بجانبه
-   const top=by-.9*bh,chin=by+bh,x0=bx-1.8*bw,x1=bx+bw+1.8*bw;
-   for(let y=0;y<h2;y++)for(let x=0;x<w2;x++)if(y<top||(y<chin&&(x<x0||x>x1)))rem[y*w2+x]=1;
+   const top=by-.7*bh,chin=by+bh,x0=bx-1.6*bw,x1=bx+bw+1.6*bw;
+   for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){const q=y*w2+x;if((y<top||(y<chin&&(x<x0||x>x1)))&&!SK[q])rem[q]=1}
   }
   if(ACL>=2){ // إبقاء الجسم المتصل بوجهك فقط وحذف الأشخاص والأشياء المنفصلة
    const lab=new Int32Array(n),sizes=[0],st=new Int32Array(n);let cur=0;
@@ -615,7 +625,7 @@ function onSeg(r){
   for(let k=0;k<n;k++)if(rem[k])d[k*4+3]=0;
   mkx.putImageData(A,0,0);msrc2=mk;
  }
- pcx.filter='url(#mk) blur(1.5px)';drawV(pcx,msrc2,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
+ pcx.filter='blur(4px) url(#mk)';drawV(pcx,msrc2,v.videoWidth,v.videoHeight,DZ,FM);pcx.filter='none';
  pcx.globalCompositeOperation='source-in';drawV(pcx,r.image||v,v.videoWidth,v.videoHeight,DZ,FM);
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
@@ -655,7 +665,9 @@ applyMk();$('#mkb').onclick=()=>{mkl=(mkl+1)%3;try{localStorage.setItem('mk1',mk
 $('#pick').onclick=()=>{pickMode=true;toast('اضغط على الشاشة فوق اللون الذي تريد حذفه (مثلاً الشيء الأحمر)')};
 const ACN=['لا','خفيف','متوسط','قوي'];
 AUTOCLR=ACL>0;$('#ac').textContent='تنظيف: '+ACN[ACL];
-$('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac4',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: يُبقي الجسم المتصل بوجهك فقط ويحذف الأشخاص والأشياء المنفصلة عنك':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
+$('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac5',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: يُبقي الجسم المتصل بوجهك فقط ويحذف الأشخاص والأشياء المنفصلة عنك':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
+$('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');
+$('#iso').onclick=()=>{ISOL=!ISOL;try{localStorage.setItem('iso',ISOL?'1':'0')}catch(e){}$('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');toast(ISOL?'سيبقى الشخص الذي اخترتَه وحده، وتُحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة':'عُطّل عزل الشخص')};
 $('#unpick').onclick=()=>{rmCols=[];pickMode=false;toast('تم مسح كل الألوان المحذوفة')};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
