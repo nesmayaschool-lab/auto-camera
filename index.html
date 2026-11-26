@@ -85,7 +85,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 39</p>
+<p style="text-align:center;font-size:15px">الإصدار 40</p>
 <button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
@@ -117,7 +117,7 @@ textarea.in{min-height:110px;resize:vertical}
 <div class="g"><span>الصورة</span><button class="sb" id="rot">تدوير ⟳</button><button class="sb" id="mir">مرآة ⇄</button><button class="sb" id="rl">ميل ↺</button><button class="sb" id="rr2">ميل ↻</button></div>
 <div class="g"><span>ثلاثي الأبعاد</span><button class="sb" id="d3">ضبط الزاوية</button><button class="sb" id="y1">دوران ↶</button><button class="sb" id="y2">دوران ↷</button><button class="sb" id="p1">ميل ⤒</button><button class="sb" id="p2">ميل ⤓</button><button class="sb" id="r3">عادي</button><button class="sb" id="sy">لفّ رأسي ↻</button><button class="sb" id="sx">لفّ أفقي ⟳</button><button class="sb" id="ss">سرعة: وسط</button></div>
 <div class="g"><span>الصوت</span><button class="sb" id="vup">أعلى ＋</button><button class="sb" id="vdn">أخفض －</button><button class="sb" id="mut">كتم</button></div>
-<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="iso">عزلي: نعم</button><button class="sb" id="ac">تنظيف: متوسط</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
+<div class="g" id="pg" hidden><span>حجمك</span><button class="sb" id="pup">كبّر ＋</button><button class="sb" id="pdn">صغّر －</button><button class="sb" id="pick">حذف لون</button><button class="sb" id="unpick">مسح الألوان</button><button class="sb" id="hp">إخفاء شخص</button><button class="sb" id="hr">إرجاع الكل</button><button class="sb" id="rp">تدوير شخص</button><button class="sb" id="iso">عزلي: نعم</button><button class="sb" id="ac">تنظيف: متوسط</button><button class="sb" id="mkb" style="font-size:15px">إزالة: قوية</button></div>
 </div>
 <div id="side3"><div class="s3t" id="s3t">أشرطة 3D ▾</div><div id="s3b">
 <label>دوران لليمين<input type="range" id="se_r" min="0" max="100" value="0"></label>
@@ -171,6 +171,8 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
 <span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
+<span>• إخفاء شخص: اضغطه ثم اضغط على وجه أي شخص في الفيديو غيرك، فيختفي تماماً كأنه غير موجود (ويظهر مكانه الخلفية الجديدة). إرجاع الكل: يُعيد الجميع. يحتاج خلفية جديدة.</span>
+<span>• تدوير شخص: اضغطه ثم اضغط على وجه شخص غيرك، فيدور وحده ثلاثي الأبعاد بمنزلقين، وصورتك لا تتأثر. وزر «أشرطة 3D» يدير صورتك أنت.</span>
 <span>• عزلي: يُبقي الشخص الذي اخترتَه وحده، ويحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة.</span>
 <span>• أشرطة 3D (في الجهة اليسرى): أربعة أشرطة عريضة: دوران لليمين، دوران لليسار، ميل للأعلى، ميل للأسفل. اسحب الشريط ليدور صورتك بمنظور ثلاثي الأبعاد حقيقي بالزاوية التي تريدها. إعادة ترجعها كما هي.</span>
 <span>• ضبط الزاوية: يفتح منزلقين تتحكم بهما بمقدار الدوران بدقة (رأسي وأفقي من -180° إلى 180°)، وزر المنظور: «بدون منظور» هو الأنظف بدون تموج.</span>
@@ -212,10 +214,10 @@ let gri=+(localStorage.getItem('gr2')||0);if(!(gri>=0&&gri<GR.length))gri=0;
 let lv=+(localStorage.getItem('lv')||1);if(!(lv>=0&&lv<3))lv=1;
 let refs=[],ready=false,stream,astream,rec,chunks=[],running=false,lastSeen=0,facing='environment',recMs=0,timer,vids=[],wake,mime='';
 let lastBox=null,lastT=0,lastVer=0,lastLearn=0,zoom=1,DZ=1,drawOn=false,gen=0,errN=0,zt;
-let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,PERSP=1,sv={r:0,l:0,t:0,b:0},EL=1,ER=1,ET=1,EB=1,otherBoxes=[],otherT=0,ISOL=localStorage.getItem('iso')!=='0',prevA=new Float32Array(0),ADH={b:new Float32Array(210),p:new Float32Array(210)},lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac5')||3),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
+let FM=+(localStorage.getItem('fm3')||0),people=[],sel=new Set(),base=0,dataset=null,ROT=0,ROLL=0,Y3=0,P3=0,SPIN='',SPD=120,PERSP=1,sv={r:0,l:0,t:0,b:0},EL=1,ER=1,ET=1,EB=1,otherBoxes=[],otherT=0,TP=[],lastFaces=[],pickMode2='',YB=0,PB=0,ISOL=localStorage.getItem('iso')!=='0',prevA=new Float32Array(0),ADH={b:new Float32Array(210),p:new Float32Array(210)},lastSpin=0,rmCols=[],pickMode=false,ACL=+(localStorage.getItem('ac5')||3),AUTOCLR=true,MIR=false,theme=+(localStorage.getItem('theme1')||0),selCols=new Set();
 let actx,dest,gn,msrc,vol=1,muted=false;
 let bg=null,bgType='',seg=null,segBusy=false,lastSeg=0,ps=.6,pxc=.5,pyc=.6,ovl=null,lastPaint=0,curS='home';
-const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),mk=document.createElement('canvas'),mkx=mk.getContext('2d',{willReadFrequently:true}),ik=document.createElement('canvas'),ikx=ik.getContext('2d',{willReadFrequently:true}),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
+const bsc=document.createElement('canvas'),bsx=bsc.getContext('2d'),t3=document.createElement('canvas'),t3x=t3.getContext('2d'),tb2=document.createElement('canvas'),tb2x=tb2.getContext('2d'),mk=document.createElement('canvas'),mkx=mk.getContext('2d',{willReadFrequently:true}),ik=document.createElement('canvas'),ikx=ik.getContext('2d',{willReadFrequently:true}),cvs=$('#cv'),cx=cvs.getContext('2d'),bgv=$('#bgv'),pc=document.createElement('canvas'),pcx=pc.getContext('2d'),dc=document.createElement('canvas'),dx=dc.getContext('2d');
 
 try{const s=JSON.parse(localStorage.getItem('people2')||'null');if(s){people=s.p||[];sel=new Set(s.s||[])}
  else{const o=JSON.parse(localStorage.getItem('person')||'null');if(o)o.t.forEach((t,i)=>{const id='old'+i;people.push({id,t,d:o.d[i]})})}}catch(e){}
@@ -478,7 +480,7 @@ async function look(g){
    if(lastBox&&now-lastT<=5000&&now-lastVer<1500){ // فحص خفيف: هل يوجد وجه قرب آخر مكان؟
     const bs=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)),timeout(4000)]);
     n=bs.length;ms=Math.max(0,...bs.map(d=>d.score));const b=bs.map(d=>d.box).find(x=>nearLast(x,now));
-    otherBoxes=bs.map(d=>d.box).filter(x=>x!==b);otherT=now;
+    otherBoxes=bs.map(d=>d.box).filter(x=>x!==b);otherT=now;lastFaces=bs.map(d=>({box:d.box,d:null}));updateTP(lastFaces,b);
     if(b){hit=true;lastBox=b;lastT=now}
    }else{ // فحص كامل: مطابقة الوجه مع الصور
     const ds=await Promise.race([faceapi.detectAllFaces(dc,opts(416,.3)).withFaceLandmarks(true).withFaceDescriptors(),timeout(6000)]);
@@ -487,7 +489,7 @@ async function look(g){
     if(h){if(h.e<L.th*.9&&now-lastLearn>2500&&refs.length<base+12){refs.push(h.d.descriptor);lastLearn=now}}
     else h=sc.filter(x=>x.e<L.loose&&nearLast(x.d.detection.box,now)).sort((a,b)=>a.e-b.e)[0];
     if(h){hit=true;lastBox=h.d.detection.box;lastT=now;lastVer=now}
-    otherBoxes=sc.filter(x=>x!==h).map(x=>x.d.detection.box);otherT=now;
+    otherBoxes=sc.filter(x=>x!==h).map(x=>x.d.detection.box);otherT=now;lastFaces=sc.map(x=>({box:x.d.detection.box,d:x.d.descriptor}));updateTP(lastFaces,h?h.d.detection.box:null);
    }
    if(hit){lastSeen=now;if(rec.state==='paused'){rec.resume();setStatus(true)}}
    else if(rec.state==='recording'&&now-lastSeen>GR[gri]){rec.pause();setStatus(false)}
@@ -504,16 +506,33 @@ async function look(g){
 }
 
 /* ---------- تبديل الخلفية + تحريك الشخص داخلها ---------- */
-function render3D(src,dx,dy,dw,dh){
- if(!Y3&&!P3){cx.drawImage(src,dx,dy,dw,dh);return}
- const yw=Y3*Math.PI/180,pt=P3*Math.PI/180;
+function updateTP(faces,tgt){
+ const now=Date.now();
+ for(const e of TP){let best=null,bd=1e9;
+  for(const f of faces){if(f.box===tgt)continue;
+   if(f.d&&e.d){const sc=faceapi.euclideanDistance(f.d,e.d);if(sc<.6&&sc<bd){bd=sc;best=f}}
+   else{const dd=Math.hypot((f.box.x+f.box.width/2)-(e.box.x+e.box.width/2),(f.box.y+f.box.height/2)-(e.box.y+e.box.height/2))/Math.max(e.box.width,e.box.height);if(dd<1.2&&dd<bd){bd=dd;best=f}}}
+  if(best){e.box=best.box;e.t=now;if(best.d)e.d=best.d}}
+}
+function frameRect(){const W=cvs.width,H=cvs.height,v=$('#v'),ew=v.videoWidth,eh=v.videoHeight,a=W/ew,b=H/eh,lo=Math.min(a,b),hi=Math.max(a,b),k=(FM===2?hi:FM===1?lo+(hi-lo)*.5:lo),fw=ew*k,fh=eh*k;return{fx:(W-fw)/2,fy:(H-fh)/2,fw,fh}}
+function dcToPc(x,y){const R=frameRect();let u=x/dc.width;if(MIR)u=1-u;return{x:R.fx+u*R.fw,y:R.fy+(y/dc.height)*R.fh}}
+function tapToDc(ex,ey){ // من لمسة الشاشة إلى إحداثيات صورة الكشف
+ if(ROT!==0||DZ!==1||Y3||P3||!dc.width||!cvs.width)return null;
+ const r=stage.getBoundingClientRect(),sc=Math.min(r.width/cvs.width,r.height/cvs.height),ox=(r.width-cvs.width*sc)/2,oy=(r.height-cvs.height*sc)/2,W=cvs.width,H=cvs.height;
+ const X=(ex-r.left-ox)/sc,Y=(ey-r.top-oy)/sc,a=(X-(pxc*W-W*ps/2))/ps,b=(Y-(pyc*H-H*ps/2))/ps,R=frameRect();
+ let u=(a-R.fx)/R.fw;if(MIR)u=1-u;return{x:u*dc.width,y:(b-R.fy)/R.fh*dc.height};
+}
+function render3D(src,dx,dy,dw,dh,YA,PA){
+ if(YA===undefined){YA=Y3;PA=P3}
+ if(!YA&&!PA){cx.drawImage(src,dx,dy,dw,dh);return}
+ const yw=YA*Math.PI/180,pt=PA*Math.PI/180;
  if(!PERSP){ // بدون منظور: دوران نظيف
   const kx=Math.cos(yw),ky=Math.cos(pt);if(Math.abs(kx)<.02||Math.abs(ky)<.02)return;
   cx.save();cx.translate(dx+dw/2,dy+dh/2);cx.scale(kx,ky);cx.drawImage(src,-dw/2,-dh/2,dw,dh);cx.restore();return;
  }
  const D=PERSP===1?2.8:1.7,sw=src.width,sh=src.height,N=128,sg=v=>v>=0?1:-1;let cur=src;
  cx.imageSmoothingEnabled=true;
- if(P3){
+ if(PA){
   if(t3.width!==sw||t3.height!==sh){t3.width=sw;t3.height=sh}
   t3x.clearRect(0,0,sw,sh);
   const f=y=>1/(1+y*Math.sin(pt)/D),g=y=>y*Math.cos(pt)*f(y);
@@ -521,11 +540,23 @@ function render3D(src,dx,dy,dw,dh){
    t3x.drawImage(src,0,i*sh/N,sw,sh/N+1,sw/2-sw*sc/2,sh/2+Y0*sh,sw*sc,h2+sg(h2))}
   cur=t3;
  }
- if(Y3){
+ if(YA){
   const f=x=>1/(1+x*Math.sin(yw)/D),g=x=>x*Math.cos(yw)*f(x);
   for(let i=0;i<N;i++){const x0=i/N-.5,x1=(i+1)/N-.5,sc=f((x0+x1)/2),X0=g(x0),X1=g(x1),w2=(X1-X0)*dw;
    cx.drawImage(cur,i*sw/N,0,sw/N+1,sh,dx+dw/2+X0*dw,dy+dh/2-dh*sc/2,w2+sg(w2),dh*sc)}
  }else cx.drawImage(cur,dx,dy,dw,dh);
+}
+function openSheetB(){ // تحكم بدوران الشخص المختار (غيرك)
+ const sh=$('#sheet');sh.innerHTML='';sh.hidden=false;
+ const lab=t=>{const p=document.createElement('p');p.style.cssText='color:#fff;font-size:18px;text-align:right';p.textContent=t;sh.appendChild(p);return p};
+ const slider=(name,get,set)=>{const p=lab(name+': '+get()+'°'),i=document.createElement('input');i.type='range';i.min=-80;i.max=80;i.value=get();i.style.cssText='width:100%;height:44px';i.oninput=()=>{set(+i.value);p.textContent=name+': '+i.value+'°'};sh.appendChild(i)};
+ slider('دوران الشخص المختار (يمين/يسار)',()=>YB,v=>{YB=v});
+ slider('ميل الشخص المختار (أعلى/أسفل)',()=>PB,v=>{PB=v});
+ const btn=(t,fn,c)=>{const b=document.createElement('button');b.textContent=t;b.onclick=fn;if(c)b.className=c;sh.appendChild(b)};
+ btn('إعادة الشخص كما هو',()=>{YB=0;PB=0;openSheetB()},'main');
+ btn('اختيار شخص آخر',()=>{sh.hidden=true;pickMode2='rot';toast('اضغط على وجه الشخص الذي تريد تدويره')});
+ btn('إلغاء الاختيار',()=>{TP=TP.filter(z=>z.mode!=='rot');YB=0;PB=0;sh.hidden=true});
+ btn('إغلاق',()=>{sh.hidden=true});
 }
 function reset3D(){EL=ER=ET=EB=1;sv.r=sv.l=sv.t=sv.b=0;Y3=0;P3=0;SPIN='';['se_r','se_l','se_t','se_b'].forEach(i=>{$('#'+i).value=0})}
 function openSheet3D(){ // التحكم بمقدار الدوران بدقة
@@ -555,7 +586,7 @@ function onSeg(r){
  if(pc.width!==W||pc.height!==H){pc.width=W;pc.height=H}
  pcx.globalCompositeOperation='source-over';pcx.clearRect(0,0,W,H);
  let msrc2=m;
- if(AUTOCLR||rmCols.length){
+ if(AUTOCLR||rmCols.length||TP.length){
   const w2=160,h2=Math.max(8,Math.round(160*v.videoHeight/v.videoWidth)),n=w2*h2;
   if(mk.width!==w2||mk.height!==h2){mk.width=w2;mk.height=h2;ik.width=w2;ik.height=h2}
   mkx.clearRect(0,0,w2,h2);mkx.drawImage(m,0,0,w2,h2);ikx.drawImage(r.image||v,0,0,w2,h2);
@@ -596,9 +627,12 @@ function onSeg(r){
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const xx=x+q;if(xx>=0&&xx<w2&&au[y*w2+xx])m1=1}t[y*w2+x]=m1}
    for(let y=0;y<h2;y++)for(let x=0;x<w2;x++){let m1=0;for(let q=-R;q<=R&&!m1;q++){const yy=y+q;if(yy>=0&&yy<h2&&t[yy*w2+x])m1=1}if(m1&&!inC(x,y))rem[y*w2+x]=1}
   }
+  if(dc.width)for(const e of TP){if(e.mode!=='hide')continue; // إخفاء كامل للأشخاص المختارين
+   const sx2=w2/dc.width,sy2=h2/dc.height,ox=e.box.x*sx2,ow=e.box.width*sx2,oy=e.box.y*sy2,oh=e.box.height*sy2,xa=Math.max(0,Math.floor(ox-1.3*ow)),xb=Math.min(w2-1,Math.ceil(ox+ow+1.3*ow)),ya=Math.max(0,Math.floor(oy-.7*oh));
+   for(let y=ya;y<h2;y++)for(let x=xa;x<=xb;x++)if(!inC(x,y))rem[y*w2+x]=1}
   if(ISOL&&core&&otherBoxes.length&&Date.now()-otherT<1500&&dc.width){ // عزل: حذف أجسام الوجوه الأخرى (خارج منطقتك المحميّة)
    const sx2=w2/dc.width,sy2=h2/dc.height;
-   for(const ob of otherBoxes){const ox=ob.x*sx2,ow=ob.width*sx2,oy=ob.y*sy2,oh=ob.height*sy2,xa=Math.max(0,Math.floor(ox-1.3*ow)),xb=Math.min(w2-1,Math.ceil(ox+ow+1.3*ow)),ya=Math.max(0,Math.floor(oy-.7*oh));
+   for(const ob of otherBoxes){if(TP.some(e=>e.mode==='rot'&&Math.hypot(e.box.x+e.box.width/2-(ob.x+ob.width/2),e.box.y+e.box.height/2-(ob.y+ob.height/2))<Math.max(ob.width,ob.height)))continue;const ox=ob.x*sx2,ow=ob.width*sx2,oy=ob.y*sy2,oh=ob.height*sy2,xa=Math.max(0,Math.floor(ox-1.3*ow)),xb=Math.min(w2-1,Math.ceil(ox+ow+1.3*ow)),ya=Math.max(0,Math.floor(oy-.7*oh));
     for(let y=ya;y<h2;y++)for(let x=xa;x<=xb;x++)if(!inC(x,y))rem[y*w2+x]=1}
   }
   if(ACL===3&&core){ // قوي: أي شيء فوق الرأس أو بعيداً بجانبه
@@ -618,6 +652,8 @@ function onSeg(r){
    const keep=new Uint8Array(cur+1);
    if(core){const fx0=Math.max(0,bx|0),fx1=Math.min(w2-1,(bx+bw)|0),fy0=Math.max(0,by|0),fy1=Math.min(h2-1,(by+bh)|0);
     for(let y=fy0;y<=fy1;y++)for(let x=fx0;x<=fx1;x++){const L=lab[y*w2+x];if(L)keep[L]=1}}
+   for(const e of TP){if(e.mode!=='rot'||!dc.width)continue;const sx3=w2/dc.width,sy3=h2/dc.height,xa=Math.max(0,(e.box.x*sx3)|0),xb=Math.min(w2-1,((e.box.x+e.box.width)*sx3)|0),ya=Math.max(0,(e.box.y*sy3)|0),yb=Math.min(h2-1,((e.box.y+e.box.height)*sy3)|0);
+    for(let y=ya;y<=yb;y++)for(let x=xa;x<=xb;x++){const L=lab[y*w2+x];if(L)keep[L]=1}}
    const any=keep.some(z=>z);let mx=0;for(let i=1;i<=cur;i++)if(sizes[i]>mx)mx=sizes[i];
    const sk=new Int32Array(cur+1);for(let k=0;k<n;k++){const L=lab[k];if(L&&SK[k])sk[L]++}
    for(let k=0;k<n;k++){const L=lab[k];if(!L)continue;const hand=sk[L]>.35*sizes[L]&&sizes[L]>mx*.008;if(any?(!keep[L]&&!hand):sizes[L]<mx*.04)rem[k]=1}
@@ -629,7 +665,15 @@ function onSeg(r){
  pcx.globalCompositeOperation='source-in';drawV(pcx,r.image||v,v.videoWidth,v.videoHeight,DZ,FM);
  pcx.globalCompositeOperation='source-over';
  if(bgType==='video')cover(bgv,bgv.videoWidth,bgv.videoHeight,1);else cover(bg,bg.width,bg.height,1);
- const pw=W*ps,ph=H*ps;render3D(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
+ const pw=W*ps,ph=H*ps;let bR=null;
+ const tb=TP.find(e=>e.mode==='rot');
+ if(tb&&ROT===0&&DZ===1&&dc.width){ // نفصل الشخص المختار في طبقة مستقلة ليدور وحده
+  const p1=dcToPc(tb.box.x-1.3*tb.box.width,tb.box.y-.7*tb.box.height),p2=dcToPc(tb.box.x+tb.box.width*2.3,dc.height);
+  const x0=Math.max(0,Math.floor(Math.min(p1.x,p2.x))),x1=Math.min(W,Math.ceil(Math.max(p1.x,p2.x))),y0=Math.max(0,Math.floor(Math.min(p1.y,p2.y))),y1=Math.min(H,Math.ceil(Math.max(p1.y,p2.y)));
+  if(x1-x0>8&&y1-y0>8){bR={x:x0,y:y0,w:x1-x0,h:y1-y0};tb2.width=bR.w;tb2.height=bR.h;tb2x.clearRect(0,0,bR.w,bR.h);tb2x.drawImage(pc,bR.x,bR.y,bR.w,bR.h,0,0,bR.w,bR.h);pcx.clearRect(bR.x,bR.y,bR.w,bR.h)}
+ }
+ render3D(pc,pxc*W-pw/2,pyc*H-ph/2,pw,ph);
+ if(bR)render3D(tb2,pxc*W-pw/2+bR.x*ps,pyc*H-ph/2+bR.y*ps,bR.w*ps,bR.h*ps,YB,PB);
  drawOvl();
 }
 let segP=null;
@@ -668,6 +712,9 @@ AUTOCLR=ACL>0;$('#ac').textContent='تنظيف: '+ACN[ACL];
 $('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac5',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: يُبقي الجسم المتصل بوجهك فقط ويحذف الأشخاص والأشياء المنفصلة عنك':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
 $('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');
 $('#iso').onclick=()=>{ISOL=!ISOL;try{localStorage.setItem('iso',ISOL?'1':'0')}catch(e){}$('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');toast(ISOL?'سيبقى الشخص الذي اخترتَه وحده، وتُحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة':'عُطّل عزل الشخص')};
+$('#hp').onclick=()=>{if(!bg){toast('اختر خلفية جديدة أولاً ليختفي الشخص تماماً');return}pickMode2='hide';toast('اضغط على وجه الشخص الذي تريد إخفاءه')};
+$('#hr').onclick=()=>{TP=TP.filter(e=>e.mode!=='hide');toast('عاد كل من أخفيتهم')};
+$('#rp').onclick=()=>{if(!bg){toast('اختر خلفية جديدة أولاً');return}if(TP.some(e=>e.mode==='rot')){openSheetB();return}pickMode2='rot';toast('اضغط على وجه الشخص الذي تريد تدويره')};
 $('#unpick').onclick=()=>{rmCols=[];pickMode=false;toast('تم مسح كل الألوان المحذوفة')};
 $('#pup').onclick=()=>{ps=clamp(ps*1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
 $('#pdn').onclick=()=>{ps=clamp(ps/1.15,.15,2);flash('حجمك '+Math.round(ps*100)+'%')};
@@ -676,6 +723,14 @@ const pdist=()=>{const a=[...ptrs.values()];return a.length<2?0:Math.hypot(a[0].
 stage.onpointerdown=e=>{if(!bg||e.target.closest('#side,#side3,#sheet'))return;
  if(pickMode){pickMode=false;const r=stage.getBoundingClientRect(),sc=Math.min(r.width/cvs.width,r.height/cvs.height),ox=(r.width-cvs.width*sc)/2,oy=(r.height-cvs.height*sc)/2,x=Math.round((e.clientX-r.left-ox)/sc),y=Math.round((e.clientY-r.top-oy)/sc);
   try{const d=cx.getImageData(Math.max(0,x-2),Math.max(0,y-2),5,5).data;let R=0,G=0,B=0,n=0;for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];n++}rmCols.push(rgb2hsv(R/n,G/n,B/n));toast('تم. سيُحذف هذا اللون من الخلفية القديمة.')}catch(er){toast('تعذّر اختيار اللون، حاول مرة أخرى.')}
+  return}
+if(pickMode2){const m2=pickMode2;pickMode2='';const q=tapToDc(e.clientX,e.clientY);
+  if(!q){toast('لا يعمل الاختيار الآن: أوقف تدوير الصورة والتقريب وأشرطة 3D أولاً.');return}
+  let best=null,bd=1e9;for(const f of lastFaces){if(f.box===lastBox)continue;const dd=Math.hypot(q.x-(f.box.x+f.box.width/2),q.y-(f.box.y+f.box.height/2))/Math.max(f.box.width,f.box.height);if(dd<bd){bd=dd;best=f}}
+  if(!best||bd>2.2){toast('لم أجد وجهاً قرب لمستك. اضغط على وجه الشخص بوضوح (ليس وجهك أنت).');return}
+  if(m2==='rot')TP=TP.filter(z=>z.mode!=='rot');
+  TP.push({mode:m2,box:best.box,d:best.d||null,t:Date.now()});
+  if(m2==='hide')toast('تم إخفاء هذا الشخص تماماً. «إرجاع الكل» يعيده.');else{toast('تم اختيار الشخص. تحكم في دورانه.');openSheetB()}
   return}
 try{stage.setPointerCapture(e.pointerId)}catch(x){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});pd=pdist()};
 stage.onpointermove=e=>{
