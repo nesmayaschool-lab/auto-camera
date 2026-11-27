@@ -85,7 +85,7 @@ textarea.in{min-height:110px;resize:vertical}
 <section id="home" class="center">
 <div class="grow col center"><h1>تصوير تلقائي</h1><p>يسجّل الفيديو فقط حين يظهر الشخص الذي تختاره، في أي مكان من الكادر.</p></div>
 <div class="col"><button class="main" id="goStart">ابدأ تصوير جديد</button><button id="goData">بياناتي (أسماء وإحصائيات)</button><button id="goVids">فيديوهاتي</button><button id="goHelp">شرح الأزرار</button></div>
-<p style="text-align:center;font-size:15px">الإصدار 40</p>
+<p style="text-align:center;font-size:15px">الإصدار 41</p>
 <button id="upd" style="min-height:48px;font-size:18px">تحديث التطبيق (إذا ظهرت نسخة قديمة)</button>
 </section>
 
@@ -129,7 +129,7 @@ textarea.in{min-height:110px;resize:vertical}
 <div id="sheet" hidden></div>
 <div id="ctrl">
 <p id="bgm"></p>
-<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="mir2" style="flex:1 1 30%">مرآة (عكس اليمين)</button><button id="fill" style="flex:1 1 30%">حجم الصورة: ملء الشاشة</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
+<div class="bar" style="flex-wrap:wrap"><button id="flip" style="flex:1 1 30%">قلب الكاميرا</button><button id="rot2" style="flex:1 1 30%">تدوير الصورة</button><button id="mir2" style="flex:1 1 30%">مرآة (عكس اليمين)</button><button id="fill" style="flex:1 1 30%">حجم الصورة: ملء الشاشة</button><button id="bg" style="flex:1 1 30%">الخلفية</button><button id="plate" style="flex:1 1 30%">غرفة فارغة</button><button id="nobg" hidden style="flex:1 1 100%">بدون خلفية</button></div>
 <button id="dat">عرض البيانات</button>
 <button class="stop" id="end">إنهاء التصوير</button>
 <p id="dbg" style="font-size:12px;color:#9ca3af;min-height:14px"></p>
@@ -171,6 +171,7 @@ textarea.in{min-height:110px;resize:vertical}
 <span>• قرّب / بعّد: يكبّر أو يصغّر المشهد.</span>
 <span>• حجم الصورة: «كامل المشهد» بدون تكبير وتُملأ الأطراف بخلفية ضبابية، «متوسط» يملأ أكثر، «ملء الشاشة» يملأ الكادر (يقصّ الجوانب).</span>
 <span>• تدوير: يدير الصورة 90° إذا كانت الكاميرا مائلة. مرآة: يعكس يمين الصورة ويسارها (مفعّلة افتراضياً للكاميرا الأمامية).</span>
+<span>• غرفة فارغة: يلتقط صورة لغرفتك بدون أشخاص ويجعلها خلفية، فإذا أخفيتَ شخصاً ظهرت مكانه الغرفة الحقيقية كأنه لم يكن فيها، وتختفي بقايا الخلفية القديمة أيضاً. اطلب منهم الابتعاد عن الكادر 6 ثوانٍ، وثبّت الجوال ولا تحرّكه ولا تغيّر التقريب أو التدوير بعد ذلك.</span>
 <span>• إخفاء شخص: اضغطه ثم اضغط على وجه أي شخص في الفيديو غيرك، فيختفي تماماً كأنه غير موجود (ويظهر مكانه الخلفية الجديدة). إرجاع الكل: يُعيد الجميع. يحتاج خلفية جديدة.</span>
 <span>• تدوير شخص: اضغطه ثم اضغط على وجه شخص غيرك، فيدور وحده ثلاثي الأبعاد بمنزلقين، وصورتك لا تتأثر. وزر «أشرطة 3D» يدير صورتك أنت.</span>
 <span>• عزلي: يُبقي الشخص الذي اخترتَه وحده، ويحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة.</span>
@@ -712,6 +713,19 @@ AUTOCLR=ACL>0;$('#ac').textContent='تنظيف: '+ACN[ACL];
 $('#ac').onclick=()=>{ACL=(ACL+1)%4;AUTOCLR=ACL>0;try{localStorage.setItem('ac5',ACL)}catch(e){}$('#ac').textContent='تنظيف: '+ACN[ACL];toast(ACL===0?'أُوقف التنظيف التلقائي':ACL===1?'تنظيف خفيف: يحذف الألوان الزاهية بعيداً عن وجهك ولا يمسّ جسمك':ACL===2?'تنظيف متوسط: يُبقي الجسم المتصل بوجهك فقط ويحذف الأشخاص والأشياء المنفصلة عنك':'تنظيف قوي: ويحذف أي شيء فوق رأسك أو بعيداً بجانبه، وقد يقصّ شعراً عالياً أو يداً مرفوعة')};
 $('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');
 $('#iso').onclick=()=>{ISOL=!ISOL;try{localStorage.setItem('iso',ISOL?'1':'0')}catch(e){}$('#iso').textContent='عزلي: '+(ISOL?'نعم':'لا');toast(ISOL?'سيبقى الشخص الذي اخترتَه وحده، وتُحذف وجوه الآخرين وأجسادهم من الخلفية الجديدة':'عُطّل عزل الشخص')};
+async function snapPlate(){ // نلتقط الغرفة الفارغة كخلفية: ما يُخفى يظهر مكانه الغرفة الحقيقية
+ const v=$('#v'),W=cvs.width,H=cvs.height;if(!v.videoWidth||!W){toast('الكاميرا غير جاهزة');return}
+ const pl=document.createElement('canvas');pl.width=W;pl.height=H;const px=pl.getContext('2d');
+ if(FM<2){bsc.width=24;bsc.height=Math.max(8,Math.round(24*H/W));bsx.drawImage(v,0,0,bsc.width,bsc.height);px.imageSmoothingEnabled=true;px.drawImage(bsc,0,0,W,H);px.fillStyle='rgba(0,0,0,.3)';px.fillRect(0,0,W,H)}else{px.fillStyle='#000';px.fillRect(0,0,W,H)}
+ drawV(px,v,v.videoWidth,v.videoHeight,DZ);
+ try{await loadSeg()}catch(e){toast('تعذّر تجهيز الأداة. تأكد من الإنترنت.');return}
+ bg=pl;bgType='img';ps=1;pxc=.5;pyc=.5;updPrev();$('#nobg').hidden=false;
+ toast('تم التقاط الغرفة. الآن أخفِ من تريد، ولا تحرّك الجوال.');
+}
+$('#plate').onclick=()=>{
+ if(!running)return;let n=6;toast('ابتعد أنت وكل الأشخاص عن الكادر وثبّت الجوال. سيُلتقط المشهد بعد 6 ثوانٍ.');
+ const iv=setInterval(()=>{n--;flash('يُلتقط المشهد بعد '+n+' ث');if(n<=0){clearInterval(iv);snapPlate()}},1000);
+};
 $('#hp').onclick=()=>{if(!bg){toast('اختر خلفية جديدة أولاً ليختفي الشخص تماماً');return}pickMode2='hide';toast('اضغط على وجه الشخص الذي تريد إخفاءه')};
 $('#hr').onclick=()=>{TP=TP.filter(e=>e.mode!=='hide');toast('عاد كل من أخفيتهم')};
 $('#rp').onclick=()=>{if(!bg){toast('اختر خلفية جديدة أولاً');return}if(TP.some(e=>e.mode==='rot')){openSheetB();return}pickMode2='rot';toast('اضغط على وجه الشخص الذي تريد تدويره')};
